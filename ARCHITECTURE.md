@@ -1,15 +1,71 @@
-# FairWork — System Architecture & Stack
+# FairWork Architecture
 
-## Tech Stack
-- **Frontend (`./web`, port 3000):** Next.js (App Router), TypeScript, Tailwind CSS.
-- **Backend (`./api`, port 8000):** Python 3.12, FastAPI, SQLAlchemy 2.0, Alembic, Pytest.
-- **Database (`db`, port 5432):** PostgreSQL 16 (`fairwork` database).
-- **Object Storage (`minio`, ports 9000/9001):** MinIO S3-compatible bucket `fairwork-docs` for Pro COI & ID uploads.
+## Overview
+FairWork is a local-first home-services marketplace that runs entirely on Docker Compose. The system consists of:
+- A React frontend for user interaction
+- A Node.js/Express backend API
+- PostgreSQL database for data persistence
+- Object storage for file uploads (certificate of insurance, business registration)
 
-## Core Database Entities & Invariants
-1. **Users & Roles:** `HOMEOWNER`, `PRO`, `ADMIN`.
-2. **Denton County Geo-Fence:** Homeowner job creation must validate that `zip_code` belongs to Denton County, TX (e.g., 76201, 76205, 76207, 76208, 76209, 76210, 75067, 75077, 75022, 75028, 75068, 76226, 76247, 76262).
-3. **Pro Verification Gate:** Pros cannot submit a `Bid` unless `pro_profiles.verification_status == 'VERIFIED'` (requires uploaded COI + business registration or government ID).
-4. **Zero Lead Fees:** Submitting a `Bid` is free; platform fee is recorded only when a `Job` transitions to `COMPLETED`.
-5. **Merit-Based Ranking:** Public Pro listings sort strictly by `merit_score` computed from `completed_jobs_count`, `avg_rating`, and completion reliability.
-6. **Verified Reviews Only:** `POST /jobs/{id}/reviews` succeeds only if `job.status == 'COMPLETED'` and no prior review exists for that `job_id`.
+## Project Structure
+
+```
+fairwork/
+├── docker-compose.yml          # Docker configuration
+├── README.md                   # Project documentation
+├── .gitignore                  # Git ignore rules
+├── frontend/                   # React frontend
+│   ├── Dockerfile              # Frontend Dockerfile
+│   ├── package.json            # Frontend dependencies
+│   └── src/                    # Frontend source code
+├── backend/                    # Node.js/Express backend
+│   ├── Dockerfile              # Backend Dockerfile
+│   ├── package.json            # Backend dependencies
+│   ├── server.js               # Main server file
+│   ├── config/                 # Configuration files
+│   │   └── database.js         # Database connection
+│   ├── db/                     # Database schema and migrations
+│   │   └── schema.md           # Database schema documentation
+│   ├── controllers/            # Request handlers
+│   ├── models/                 # Data models
+│   ├── routes/                 # API routes
+│   ├── services/               # Business logic
+│   ├── middleware/             # Express middleware
+│   └── tests/                  # Test files
+└── .env                        # Environment variables (not committed)
+```
+
+## Technology Stack
+
+### Frontend
+- React 18 with create-react-app
+- Axios for HTTP requests
+- React Router for navigation
+
+### Backend
+- Node.js 18
+- Express.js web framework
+- PostgreSQL database
+- Jest for testing
+- Supertest for API testing
+
+### Infrastructure
+- Docker Compose for local development
+- PostgreSQL 15
+
+## Local Development Setup
+
+1. Ensure Docker and Docker Compose are installed
+2. Clone the repository
+3. Run `docker-compose up --build` to start all services
+4. Access frontend at http://localhost:3001
+5. Access backend API at http://localhost:3000
+
+## Environment Variables
+
+The application uses environment variables for configuration. Create a `.env` file in the root directory with:
+- DB_USER=fairwork_user
+- DB_NAME=fairwork
+- DB_PASSWORD=fairwork_password
+- DB_HOST=db
+- DB_PORT=5432
