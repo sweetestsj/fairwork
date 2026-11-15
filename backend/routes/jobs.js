@@ -9,18 +9,18 @@ const { db } = require('../config/database');
 const jobController = new JobController(db);
 
 // GET /api/jobs - Get all jobs (with optional category filter)
-router.get('/', jobController.getAllJobs);
+router.get('/', (req, res) => jobController.getAllJobs(req, res));
 
 // GET /api/jobs/:id - Get job by ID
-router.get('/:id', jobController.getJobById);
+router.get('/:id', (req, res) => jobController.getJobById(req, res));
 
 // POST /api/jobs - Create a new job
-router.post('/', jobController.createJob);
+router.post('/', (req, res) => jobController.createJob(req, res));
 
 // PUT /api/jobs/:id - Update a job
-router.put('/:id', jobController.updateJob);
+router.put('/:id', (req, res) => jobController.updateJob(req, res));
 
 // DELETE /api/jobs/:id - Delete a job
-router.delete('/:id', jobController.deleteJob);
+router.delete('/:id', (req, res) => jobController.deleteJob(req, res));
 
 module.exports = router;

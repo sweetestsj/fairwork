@@ -12,12 +12,8 @@ describe('Database Connection', () => {
       rows: [{ test: 1 }]
     });
 
-    try {
-      const result = await query('SELECT 1 as test');
-      expect(result.rows[0].test).toBe(1);
-      expect(query).toHaveBeenCalledWith('SELECT 1 as test');
-    } catch (error) {
-      throw new Error('Database connection failed: ' + error.message);
-    }
+    const result = await query('SELECT 1 as test');
+    expect(result.rows[0].test).toBe(1);
+    expect(query).toHaveBeenCalledWith('SELECT 1 as test');
   });
 });
