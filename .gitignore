@@ -1,31 +1,10 @@
-# Dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# Environment variables
+node_modules/
+**/node_modules/
+dist/
+build/
+.next/
+coverage/
 .env
-.env.local
-.env.*.local
-
-# Build artifacts
-/build
-/dist
-/out
-
-# System
-.DS_Store
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Logs
-logs
+.env.*
 *.log
-
-# Database
-postgres_data/
+.DS_Store
