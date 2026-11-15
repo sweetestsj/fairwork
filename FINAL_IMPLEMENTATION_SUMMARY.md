@@ -53,6 +53,9 @@ backend/
   - Jobs by homeowner (`/jobs/homeowner/:homeowner_id`)
   - Quotes by job (`/quotes/job/:job_id`) and pro (`/quotes/pro/:pro_id`)
   - Reviews by job (`/reviews/job/:job_id`), reviewer (`/reviews/reviewer/:reviewer_id`), and reviewee (`/reviews/reviewee/:reviewee_id`)
+  - Pro verification (`/pros/:id/verify`)
+  - Top-rated pros (`/pros/top-rated`)
+  - Pros by service (`/pros/service/:service_id`)
 
 ## Verification
 

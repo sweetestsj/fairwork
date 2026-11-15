@@ -1,0 +1,5 @@
+- [final-summary](final-summary.md)
+- [api-endpoints](api-endpoints.md) — API endpoints for FairWork marketplace
+- [database-schema](database-schema.md) — Database schema for FairWork marketplace
+- [project-overview](project-overview.md) — Overview of FairWork project structure and current implementation status
+- [implementation-complete](implementation-complete.md) — Final implementation summary for FairWork marketplace backend
