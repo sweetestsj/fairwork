@@ -61,6 +61,25 @@ fairwork/
 4. Access frontend at http://localhost:3001
 5. Access backend API at http://localhost:3000
 
+## API Endpoints
+
+### Health Check
+- `GET /health` - Health check endpoint
+
+### Users
+- `GET /users` - Get all users
+- `GET /users/:id` - Get user by ID
+- `POST /users` - Create a new user
+- `PUT /users/:id` - Update user
+- `DELETE /users/:id` - Delete user
+
+### Services
+- `GET /services` - Get all services
+- `GET /services/:id` - Get service by ID
+- `POST /services` - Create a new service
+- `PUT /services/:id` - Update service
+- `DELETE /services/:id` - Delete service
+
 ## Environment Variables
 
 The application uses environment variables for configuration. Create a `.env` file in the root directory with:
