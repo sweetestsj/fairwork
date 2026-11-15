@@ -91,3 +91,14 @@ exports.deleteService = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Get launch services
+exports.getLaunchServices = async (req, res) => {
+  try {
+    const result = await query('SELECT * FROM services ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error getting launch services:', error.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
