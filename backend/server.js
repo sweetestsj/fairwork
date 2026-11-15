@@ -43,13 +43,18 @@ app.use('/reviews', reviewRoutes);
 const proRoutes = require('./routes/pros.routes');
 app.use('/pros', proRoutes);
 
-// Initialize database and start server (only if not in test environment)
+// Initialize database and start server
 async function startServer() {
   try {
-    // Only initialize database if we're not in a test environment
-    if (process.env.NODE_ENV !== 'test') {
-      const { initDatabase } = require('./db/init');
-      await initDatabase();
+    // Test database connection if not in test environment or if DATABASE_URL is set
+    const isTestEnv = process.env.NODE_ENV === 'test';
+
+    if (!isTestEnv || process.env.DATABASE_URL) {
+      const { query } = require('./config/database');
+
+      // Test database connection
+      await query('SELECT 1');
+      console.log('Database connection successful');
     }
 
     app.listen(PORT, () => {

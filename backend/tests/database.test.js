@@ -7,13 +7,6 @@ describe('Database Connection', () => {
     expect(db).toBeDefined();
   });
 
-  test('should be able to initialize database schema', async () => {
-    // This test would normally run in a proper environment
-    // For now, we're just checking that the initialization function exists
-    const initDb = require('../db/init');
-    expect(typeof initDb.initDatabase).toBe('function');
-  });
-
   test('should be able to import controllers and routes', async () => {
     // Test that all required modules can be imported
     const usersController = require('../controllers/users.controller');
