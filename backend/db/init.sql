@@ -105,3 +105,17 @@ INSERT INTO services (name, description, category, estimated_duration) VALUES
 ('Tree/bush trimming', 'Pruning and trimming of trees and bushes', 'Landscaping', 90),
 ('Gutter cleaning', 'Cleaning of gutters and downspouts', 'Maintenance', 60)
 ON CONFLICT (name) DO NOTHING;
+
+-- Insert sample data for testing
+INSERT INTO users (email, password_hash, role, first_name, last_name, phone, address) VALUES
+('homeowner@example.com', '$2b$10$example_hash', 'homeowner', 'John', 'Doe', '555-0100', '{"street": "123 Main St", "city": "Denton", "state": "TX", "zip": "76201"}'),
+('pro@example.com', '$2b$10$example_hash', 'pro', 'Jane', 'Smith', '555-0101', '{"street": "456 Oak Ave", "city": "Dallas", "state": "TX", "zip": "75201"}')
+ON CONFLICT (email) DO NOTHING;
+
+INSERT INTO homeowners (user_id) VALUES
+((SELECT id FROM users WHERE email = 'homeowner@example.com'))
+ON CONFLICT (user_id) DO NOTHING;
+
+INSERT INTO pros (user_id, business_name, verified) VALUES
+((SELECT id FROM users WHERE email = 'pro@example.com'), 'Smith Services', true)
+ON CONFLICT (user_id) DO NOTHING;

@@ -1,23 +1,22 @@
-// This is a placeholder test file for pros functionality
-// In a real implementation, this would contain tests for pro-specific features
+const request = require('supertest');
+const app = require('../test-setup-mock');
 
-describe('Pros Module', () => {
-  test('should be able to import pros controller', () => {
-    const prosController = require('../controllers/pros.controller');
-    expect(prosController).toBeDefined();
+describe('Pros API', () => {
+  // Test the pros endpoint
+  test('should handle pros endpoint', async () => {
+    const response = await request(app).get('/pros');
+    expect(response.status).toBe(200);
   });
 
-  test('should have all required functions', () => {
-    const prosController = require('../controllers/pros.controller');
-    expect(typeof prosController.getPros).toBe('function');
-    expect(typeof prosController.getProById).toBe('function');
-    expect(typeof prosController.createPro).toBe('function');
-    expect(typeof prosController.updatePro).toBe('function');
-    expect(typeof prosController.deletePro).toBe('function');
+  // Test getting top-rated pros
+  test('should handle top-rated pros endpoint', async () => {
+    const response = await request(app).get('/pros/top-rated');
+    expect(response.status).toBe(200);
   });
 
-  test('should be able to import pros routes', () => {
-    const prosRoutes = require('../routes/pros.routes');
-    expect(prosRoutes).toBeDefined();
+  // Test getting pros by verification status
+  test('should handle verified pros endpoint', async () => {
+    const response = await request(app).get('/pros/verified/true');
+    expect(response.status).toBe(200);
   });
 });

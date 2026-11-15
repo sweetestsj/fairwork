@@ -5,10 +5,12 @@ const prosController = require('../controllers/pros.controller');
 // Pro routes
 router.get('/', prosController.getPros);
 router.get('/:id', prosController.getProById);
-router.get('/user/:user_id', prosController.getProByUserId);
+router.get('/verified/:verified', prosController.getProsByVerification);
 router.post('/', prosController.createPro);
-router.put('/:user_id', prosController.updatePro);
-router.put('/verify/:user_id', prosController.verifyPro);
-router.delete('/:user_id', prosController.deletePro);
+router.put('/:id', prosController.updatePro);
+router.put('/:id/verify', prosController.verifyPro);
+router.delete('/:id', prosController.deletePro);
+router.get('/top-rated', prosController.getTopRatedPros);
+router.get('/service/:service_id', prosController.getProsByService);
 
 module.exports = router;
