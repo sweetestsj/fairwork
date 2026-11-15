@@ -31,6 +31,14 @@ describe('Job Functionality', () => {
 
   it('should have correct routes structure', () => {
     const jobsRouter = require('../routes/jobs');
-    expect(typeof jobsRouter).toBe('object');
+    // Check that it's a router object with expected methods
+    expect(jobsRouter).toBeDefined();
+    // The routes file exports an express router, which is a function with router methods
+    expect(typeof jobsRouter).toBe('function');
+    // Check that it has the expected express router methods (these are attached to the function)
+    expect(jobsRouter.get).toBeDefined();
+    expect(jobsRouter.post).toBeDefined();
+    expect(jobsRouter.put).toBeDefined();
+    expect(jobsRouter.delete).toBeDefined();
   });
 });
