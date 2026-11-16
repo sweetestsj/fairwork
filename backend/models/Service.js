@@ -88,7 +88,8 @@ class Service {
     const duration = Number(estimated_duration);
 
     // Verify it's actually a number and not NaN or Infinity
-    if (isNaN(duration) || !Number.isFinite(duration)) {
+    // Also check that the string representation converts back to the same value (handles '123abc' case)
+    if (isNaN(duration) || !Number.isFinite(duration) || duration.toString() !== estimated_duration.toString()) {
       throw new Error('Estimated duration must be a valid number');
     }
 
