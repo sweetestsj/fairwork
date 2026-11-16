@@ -33,14 +33,40 @@ A local-first home-services marketplace for Denton County homeowners and Dallas-
 
 ## API Endpoints
 
+### Health Check
 - `GET /` - Welcome message
 - `GET /health` - Health check endpoint
 
+### Services
+- `GET /api/services` - Get all active services
+- `GET /api/services/:id` - Get a specific service
+
+### Jobs
+- `GET /api/jobs` - Get all jobs (with optional category filtering)
+- `GET /api/jobs/category/:category` - Get jobs by category
+- `GET /api/jobs/:id` - Get a specific job
+- `POST /api/jobs` - Create a new job
+- `PUT /api/jobs/:id` - Update a job
+- `DELETE /api/jobs/:id` - Cancel a job
+
 ## Database Schema
 
-The database uses PostgreSQL and is configured with:
-- User accounts (homeowners and pros)
-- Service listings
-- Job postings
-- Reviews and ratings
-- Pro credential verification
+See [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) for complete database schema documentation.
+
+## Documentation
+
+- [API Documentation](API_DOCUMENTATION.md)
+- [Database Schema](DATABASE_SCHEMA.md)
+
+## Testing
+
+Run tests with:
+```bash
+cd backend && npm test
+```
+
+The project includes comprehensive tests for controllers, models, and routes.
+
+## Project Architecture
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed system architecture documentation.
