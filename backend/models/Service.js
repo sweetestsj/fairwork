@@ -84,6 +84,11 @@ class Service {
       throw new Error('Estimated duration is required');
     }
 
+    // Check for NaN values in numeric fields
+    if (isNaN(estimated_duration)) {
+      throw new Error('Estimated duration must be a valid number');
+    }
+
     if (typeof estimated_duration !== 'number' || estimated_duration < 0) {
       throw new Error('Estimated duration must be a positive number');
     }

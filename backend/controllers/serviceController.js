@@ -65,7 +65,8 @@ const createService = async (req, res) => {
       data: newService
     });
   } catch (error) {
-    if (error.message.includes('duplicate key')) {
+    // Check for null/undefined error.message to prevent potential null reference
+    if (error && error.message && error.message.includes('duplicate key')) {
       return res.status(400).json({
         success: false,
         error: 'Service with this name already exists'
