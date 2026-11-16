@@ -25,6 +25,41 @@ class JobController {
     }
   }
 
+  // Get jobs by category
+  async getJobsByCategory(req, res) {
+    try {
+      const { category } = req.params;
+
+      // Validate that category is provided
+      if (!category) {
+        return res.status(400).json({
+          success: false,
+          message: 'Category is required'
+        });
+      }
+
+      const jobs = await this.jobModel.getAllJobs(category);
+      res.json({
+        success: true,
+        count: jobs.length,
+        data: jobs
+      });
+    } catch (error) {
+      // Handle database errors specifically
+      if (error.message.includes('invalid input')) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid category provided'
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+
   // Get job by ID
   async getJobById(req, res) {
     try {
