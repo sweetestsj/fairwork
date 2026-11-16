@@ -87,6 +87,19 @@ class Service {
     if (typeof estimated_duration !== 'number' || estimated_duration < 0) {
       throw new Error('Estimated duration must be a positive number');
     }
+
+    // Additional validation for data types
+    if (typeof name !== 'string') {
+      throw new Error('Service name must be a string');
+    }
+
+    if (typeof description !== 'string') {
+      throw new Error('Service description must be a string');
+    }
+
+    if (typeof category !== 'string') {
+      throw new Error('Service category must be a string');
+    }
   }
 }
 
