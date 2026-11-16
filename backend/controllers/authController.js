@@ -36,8 +36,6 @@ const register = async (req, res) => {
       token
     });
   } catch (error) {
-    console.error('Registration error:', error); // Add logging for debugging
-
     // Handle PostgreSQL unique constraint violation (email already exists)
     if (error.code === '23505') {
       return res.status(409).json({
@@ -113,8 +111,6 @@ const login = async (req, res) => {
       token
     });
   } catch (error) {
-    console.error('Login error:', error); // Add logging for debugging
-
     // If it's a database-related error, return 500
     if (error.message.includes('database') || error.message.includes('DB')) {
       return res.status(500).json({
