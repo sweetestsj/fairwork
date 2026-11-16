@@ -30,7 +30,7 @@ class JobController {
     try {
       const { category } = req.params;
 
-      // Validate that category is provided
+      // Validate that category is provided and is a string
       if (!category) {
         return res.status(400).json({
           success: false,
@@ -38,7 +38,31 @@ class JobController {
         });
       }
 
-      const jobs = await this.jobModel.getAllJobs(category);
+      if (typeof category !== 'string') {
+        return res.status(400).json({
+          success: false,
+          message: 'Category must be a string'
+        });
+      }
+
+      // Check for potentially malicious input patterns
+      if (category.length > 100) {
+        return res.status(400).json({
+          success: false,
+          message: 'Category is too long'
+        });
+      }
+
+      // Basic sanitization to prevent common injection patterns
+      const sanitizedCategory = category.trim();
+      if (sanitizedCategory === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'Category cannot be empty'
+        });
+      }
+
+      const jobs = await this.jobModel.getAllJobs(sanitizedCategory);
       res.json({
         success: true,
         count: jobs.length,
