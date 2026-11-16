@@ -1,5 +1,6 @@
 // Service controller for FairWork
 const Service = require('../models/Service');
+const errorHandler = require('../utils/errorHandler');
 
 // Get all services
 const getAllServices = async (req, res) => {
@@ -12,10 +13,7 @@ const getAllServices = async (req, res) => {
       data: services
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    errorHandler(res, error);
   }
 };
 
@@ -37,10 +35,7 @@ const getServiceById = async (req, res) => {
       data: service
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    errorHandler(res, error);
   }
 };
 
@@ -81,12 +76,7 @@ const createService = async (req, res) => {
       });
     }
 
-    // Ensure error.message is properly handled to prevent null reference
-    const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
-    res.status(400).json({
-      success: false,
-      error: errorMessage
-    });
+    errorHandler(res, error);
   }
 };
 

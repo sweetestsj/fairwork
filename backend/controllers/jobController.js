@@ -1,6 +1,7 @@
 // Job controller for FairWork marketplace
 
 const Job = require('../models/job');
+const errorHandler = require('../utils/errorHandler');
 
 class JobController {
   constructor(db) {
@@ -20,12 +21,7 @@ class JobController {
         data: jobs
       });
     } catch (error) {
-      // Ensure error.message is properly handled to prevent null reference
-      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
-      res.status(500).json({
-        success: false,
-        message: errorMessage
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -81,12 +77,7 @@ class JobController {
         });
       }
 
-      // Ensure error.message is properly handled to prevent null reference
-      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
-      res.status(500).json({
-        success: false,
-        message: errorMessage
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -108,12 +99,7 @@ class JobController {
         data: job
       });
     } catch (error) {
-      // Ensure error.message is properly handled to prevent null reference
-      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
-      res.status(500).json({
-        success: false,
-        message: errorMessage
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -136,12 +122,7 @@ class JobController {
         data: job
       });
     } catch (error) {
-      // Ensure error.message is properly handled to prevent null reference
-      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
-      res.status(500).json({
-        success: false,
-        message: errorMessage
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -173,12 +154,7 @@ class JobController {
         data: job
       });
     } catch (error) {
-      // Ensure error.message is properly handled to prevent null reference
-      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
-      res.status(500).json({
-        success: false,
-        message: errorMessage
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -193,12 +169,7 @@ class JobController {
         message: 'Job cancelled successfully'
       });
     } catch (error) {
-      // Ensure error.message is properly handled to prevent null reference
-      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
-      res.status(500).json({
-        success: false,
-        message: errorMessage
-      });
+      errorHandler(res, error);
     }
   }
 }
