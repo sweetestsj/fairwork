@@ -7,21 +7,11 @@ class User {
     const { name, email, password, role } = userData;
 
     try {
-      // Check if user already exists
-      const existingUser = await query(
-        'SELECT id FROM users WHERE email = $1',
-        [email]
-      );
-
-      if (existingUser.rows.length > 0) {
-        throw new Error('User with this email already exists');
-      }
-
       // Hash the password
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      // Create user
+      // Create user - this will throw a constraint violation if email already exists
       const result = await query(
         'INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role, created_at',
         [name, email, hashedPassword, role]
@@ -29,7 +19,13 @@ class User {
 
       return result.rows[0];
     } catch (error) {
-      throw new Error(`Failed to create user: ${error.message}`);
+      // Check for unique violation error (PostgreSQL specific)
+      if (error.code === '23505') {
+        throw new Error('A user with this email already exists');
+      }
+
+      // If it's a different kind of database error, re-throw the original error
+      throw error;
     }
   }
 
