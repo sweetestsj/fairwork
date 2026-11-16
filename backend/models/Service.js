@@ -89,7 +89,12 @@ class Service {
       throw new Error('Estimated duration must be a valid number');
     }
 
-    if (typeof estimated_duration !== 'number' || estimated_duration < 0) {
+    // More robust validation to ensure it's actually a number (not just not NaN)
+    if (!Number.isFinite(estimated_duration)) {
+      throw new Error('Estimated duration must be a valid number');
+    }
+
+    if (estimated_duration < 0) {
       throw new Error('Estimated duration must be a positive number');
     }
 

@@ -23,6 +23,10 @@ app.get('/health', (req, res) => {
 const serviceRoutes = require('./routes/services');
 app.use('/services', serviceRoutes);
 
+// Jobs routes
+const jobsRouter = require('./routes/jobs');
+app.use('/api/jobs', jobsRouter);
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

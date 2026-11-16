@@ -63,9 +63,21 @@ try {
 
   console.log('✓ Database connection pool created successfully');
 
-  // Clean up the test pool
-  testPool.end();
-  console.log('✓ Test database pool cleaned up');
+  // Test actual connectivity by running a simple query
+  const testQuery = async () => {
+    try {
+      await testPool.query('SELECT 1');
+      console.log('✓ Database connection verified successfully');
+    } catch (queryError) {
+      console.log('⚠ Warning: Could not verify database connectivity:', queryError.message);
+    } finally {
+      // Clean up the test pool
+      testPool.end();
+      console.log('✓ Test database pool cleaned up');
+    }
+  };
+
+  testQuery();
 } catch (error) {
   console.log('⚠ Warning: Could not create test database pool:', error.message);
 }
