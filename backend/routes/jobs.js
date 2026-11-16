@@ -12,7 +12,7 @@ const jobController = new JobController(db);
 router.get('/', (req, res) => jobController.getAllJobs(req, res));
 
 // GET /api/jobs/:category - Get jobs by category
-router.get('/:category', (req, res) => jobController.getJobsByCategory(req, res));
+router.get('/:category', jobController.getJobsByCategory.bind(jobController));
 
 // GET /api/jobs/:id - Get job by ID
 router.get('/:id', (req, res) => jobController.getJobById(req, res));
