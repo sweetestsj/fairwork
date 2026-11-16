@@ -8,6 +8,13 @@ function App() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('jobs');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [newJobForm, setNewJobForm] = useState({
+    title: '',
+    description: '',
+    serviceId: '',
+    homeownerId: ''
+  });
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,7 +25,7 @@ function App() {
           throw new Error(`Failed to fetch services: ${servicesResponse.status}`);
         }
         const servicesData = await servicesResponse.json();
-        setServices(servicesData);
+        setServices(servicesData.data || servicesData);
 
         // Fetch jobs
         const jobsResponse = await fetch('/api/jobs');
@@ -26,7 +33,7 @@ function App() {
           throw new Error(`Failed to fetch jobs: ${jobsResponse.status}`);
         }
         const jobsData = await jobsResponse.json();
-        setJobs(jobsData);
+        setJobs(jobsData.data || jobsData);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -47,6 +54,52 @@ function App() {
 
   // Get unique categories from services
   const categories = ['all', ...new Set(services.map(service => service.category))];
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewJobForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Submit new job form
+  const handleSubmitJob = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/jobs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: newJobForm.title,
+          description: newJobForm.description,
+          serviceId: parseInt(newJobForm.serviceId),
+          homeownerId: parseInt(newJobForm.homeownerId)
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create job: ${response.status}`);
+      }
+
+      const newJob = await response.json();
+
+      // Add the new job to the list
+      setJobs(prev => [newJob.data || newJob, ...prev]);
+      setShowCreateForm(false);
+      setNewJobForm({
+        title: '',
+        description: '',
+        serviceId: '',
+        homeownerId: ''
+      });
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   if (loading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error">Error: {error}</div>;
@@ -77,6 +130,60 @@ function App() {
         <div className="jobs-section">
           <h2>Available Jobs</h2>
 
+          <div className="jobs-controls">
+            <button
+              className="create-job-btn"
+              onClick={() => setShowCreateForm(!showCreateForm)}
+            >
+              {showCreateForm ? 'Cancel' : 'Post a New Job'}
+            </button>
+          </div>
+
+          {showCreateForm && (
+            <div className="create-job-form">
+              <h3>Create New Job</h3>
+              <form onSubmit={handleSubmitJob}>
+                <input
+                  type="text"
+                  name="title"
+                  placeholder="Job Title"
+                  value={newJobForm.title}
+                  onChange={handleInputChange}
+                  required
+                />
+                <textarea
+                  name="description"
+                  placeholder="Job Description"
+                  value={newJobForm.description}
+                  onChange={handleInputChange}
+                  required
+                />
+                <select
+                  name="serviceId"
+                  value={newJobForm.serviceId}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select Service</option>
+                  {services.map(service => (
+                    <option key={service.id} value={service.id}>
+                      {service.name}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  name="homeownerId"
+                  placeholder="Homeowner ID"
+                  value={newJobForm.homeownerId}
+                  onChange={handleInputChange}
+                  required
+                />
+                <button type="submit">Submit Job</button>
+              </form>
+            </div>
+          )}
+
           {/* Category filter */}
           <div className="category-filter">
             <label htmlFor="category-select">Filter by category:</label>
@@ -106,12 +213,12 @@ function App() {
                     <div className="job-details">
                       <span className="job-service">Service: {service ? service.name : 'Unknown'}</span>
                       <span className="job-status">Status: {job.status}</span>
-                      <span className="job-budget">
-                        Budget: ${job.budget_min?.toFixed(2) || '0.00'} - ${job.budget_max?.toFixed(2) || '0.00'}
-                      </span>
                     </div>
                     <p className="job-location">Location: {job.location}</p>
                     <p className="job-date">Posted: {new Date(job.created_at).toLocaleDateString()}</p>
+                    <div className="job-budget">
+                      Budget: ${job.budget_min?.toFixed(2) || '0.00'} - ${job.budget_max?.toFixed(2) || '0.00'}
+                    </div>
                   </div>
                 );
               })}
