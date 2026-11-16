@@ -25,6 +25,24 @@ class JobController {
     }
   }
 
+  // Get jobs by category
+  async getJobsByCategory(req, res) {
+    try {
+      const { category } = req.params;
+      const jobs = await this.jobModel.getAllJobs(category);
+      res.json({
+        success: true,
+        count: jobs.length,
+        data: jobs
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+
   // Get job by ID
   async getJobById(req, res) {
     try {
