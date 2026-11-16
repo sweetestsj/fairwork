@@ -10,7 +10,9 @@ class JobController {
   // Get all jobs with optional category filtering
   async getAllJobs(req, res) {
     try {
-      const { category } = req.query;
+      // Ensure req and req.query exist
+      const query = (req && req.query) || {};
+      const { category } = query;
       const jobs = await this.jobModel.getAllJobs(category);
       res.json({
         success: true,
@@ -18,9 +20,11 @@ class JobController {
         data: jobs
       });
     } catch (error) {
+      // Ensure error.message is properly handled to prevent null reference
+      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
       res.status(500).json({
         success: false,
-        message: error.message
+        message: errorMessage
       });
     }
   }
@@ -70,16 +74,18 @@ class JobController {
       });
     } catch (error) {
       // Handle database errors specifically
-      if (error.message.includes('invalid input')) {
+      if (error && error.message && typeof error.message === 'string' && error.message.includes('invalid input')) {
         return res.status(400).json({
           success: false,
           message: 'Invalid category provided'
         });
       }
 
+      // Ensure error.message is properly handled to prevent null reference
+      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
       res.status(500).json({
         success: false,
-        message: error.message
+        message: errorMessage
       });
     }
   }
@@ -102,9 +108,11 @@ class JobController {
         data: job
       });
     } catch (error) {
+      // Ensure error.message is properly handled to prevent null reference
+      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
       res.status(500).json({
         success: false,
-        message: error.message
+        message: errorMessage
       });
     }
   }
@@ -128,9 +136,11 @@ class JobController {
         data: job
       });
     } catch (error) {
+      // Ensure error.message is properly handled to prevent null reference
+      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
       res.status(500).json({
         success: false,
-        message: error.message
+        message: errorMessage
       });
     }
   }
@@ -163,9 +173,11 @@ class JobController {
         data: job
       });
     } catch (error) {
+      // Ensure error.message is properly handled to prevent null reference
+      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
       res.status(500).json({
         success: false,
-        message: error.message
+        message: errorMessage
       });
     }
   }
@@ -181,9 +193,11 @@ class JobController {
         message: 'Job cancelled successfully'
       });
     } catch (error) {
+      // Ensure error.message is properly handled to prevent null reference
+      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
       res.status(500).json({
         success: false,
-        message: error.message
+        message: errorMessage
       });
     }
   }
