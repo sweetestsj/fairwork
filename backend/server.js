@@ -19,6 +19,10 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Jobs routes
+const jobsRouter = require('./routes/jobs');
+app.use('/api/jobs', jobsRouter);
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
