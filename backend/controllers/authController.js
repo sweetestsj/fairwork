@@ -36,6 +36,7 @@ const register = async (req, res) => {
       token
     });
   } catch (error) {
+    console.error('Registration error:', error); // Add logging for debugging
     if (error.message.includes('already exists')) {
       return res.status(409).json({
         error: 'User already exists',
@@ -74,7 +75,7 @@ const login = async (req, res) => {
     // Generate token
     const token = generateToken(user);
 
-    res.json({
+    res.status(200).json({
       message: 'Login successful',
       user: {
         id: user.id,
@@ -85,6 +86,7 @@ const login = async (req, res) => {
       token
     });
   } catch (error) {
+    console.error('Login error:', error); // Add logging for debugging
     res.status(500).json({
       error: 'Login failed',
       message: error.message

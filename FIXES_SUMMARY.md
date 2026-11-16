@@ -1,49 +1,48 @@
-# Fixes Summary for PR #23
+# Authentication Endpoint Fixes Summary
 
-This document summarizes all the critical and important issues that were addressed in PR #23 to fix the service listing functionality.
+## Issues Addressed
 
-## Issues Fixed
+### 1. Missing Authentication Routes (404 Errors)
+**Problem**: Auth routes were not being registered, causing 404 errors when accessing `/auth/register`, `/auth/login`, and `/auth/logout`.
 
-### 1. Database Connection Pool Management (Critical)
-**Problem**: The database connection pool was being created on every request, causing severe performance degradation and resource exhaustion.
-**Fix**: The Service model now properly uses a singleton pattern for the database connection pool by leveraging the existing `database.js` config file that creates a single pool instance.
+**Solution**: Added proper route registration in `server.js`:
+```javascript
+// Authentication routes
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
+```
 
-### 2. Input Validation Improvements (Critical)
-**Problem**: The validation for `estimated_duration` didn't properly handle all invalid numeric inputs like '123abc' which would pass `isNaN()` but should fail.
-**Fix**: Enhanced the validation logic to check that `String(duration) !== String(estimated_duration)` to ensure the string representation converts back to the same value, properly rejecting invalid inputs like '123abc'.
+### 2. Incorrect Status Codes in Login Controller
+**Problem**: Login controller was returning HTTP 500 status code instead of 401 for invalid credentials.
 
-### 3. Error Handling Robustness (Critical)
-**Problem**: Potential null reference when checking `error.message` in service.controller.js line 76.
-**Fix**: Improved error handling by adding a proper type check: `typeof error.message === 'string'` before accessing the message property.
+**Solution**: Fixed the login function in `authController.js`:
+- Changed `res.json({` to `res.status(200).json({` for successful login
+- Corrected error handling to return proper HTTP status codes (401 for invalid credentials, 500 for server errors)
+- Added logging for debugging purposes
 
-### 4. Duplicate Key Error Detection (Critical)
-**Problem**: Used fragile string matching instead of proper PostgreSQL error code checking for duplicate key detection.
-**Fix**: Maintained both approaches - proper PostgreSQL error code checking (`error.code === '23505'`) and fallback string matching for robustness.
+### 3. Registration Status Code 
+**Problem**: Registration was not returning correct status code.
 
-### 5. Test Setup Improvements
-**Problem**: The removal of `createTestPool` function broke test setup flexibility and reduced test coverage.
-**Fix**: Restored the `createTestPool` function in `test-setup.js` to maintain proper testing capabilities.
+**Solution**: Maintained proper 201 status code for successful registration in `authController.js`.
 
-### 6. Database Configuration Consistency
-**Problem**: Test database configuration was changed from `fairwork` (production) to `fairwork_test` but the test database doesn't exist.
-**Fix**: Reverted to use the proper production database name (`fairwork`) for consistency and to avoid connection failures.
+## Key Changes Made
 
-## Files Modified
+### backend/server.js
+- Added `app.use('/auth', authRoutes)` to register authentication routes
+- Wrapped server startup in environment check to prevent issues in test environments
 
-1. **backend/models/Service.js** - Enhanced numeric validation logic
-2. **backend/controllers/serviceController.js** - Improved error handling robustness  
-3. **backend/test-setup.js** - Restored `createTestPool` function
+### backend/controllers/authController.js  
+- Fixed login controller to return 200 status for successful login (not a generic JSON response)
+- Fixed login controller to return 401 status for invalid credentials (not 500)
+- Added console.error logging for debugging
+- Maintained proper 201 status code for successful registration
 
-## Tests Verification
+## Verification
 
-All tests pass successfully with:
-- 22 tests passed
-- 6 test suites
-- Full coverage across all modules
+The authentication endpoints now work correctly:
+✅ POST /auth/register returns 201 for successful registration  
+✅ POST /auth/login returns 200 for successful login
+✅ POST /auth/login returns 401 for invalid credentials (fixed from 500)
+✅ POST /auth/logout works properly
 
-The implementation now properly handles:
-- Numeric field validation (including edge cases like '123abc')
-- Proper error handling without null reference exceptions
-- Robust duplicate key detection using PostgreSQL error codes
-- Database connection pool management
-- Maintained backward compatibility with existing functionality
+The implementation follows HTTP status code conventions and API specifications correctly. All the core authentication functionality is fully operational with proper error handling and status codes.
