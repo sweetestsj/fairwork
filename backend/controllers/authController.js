@@ -36,10 +36,11 @@ const register = async (req, res) => {
       token
     });
   } catch (error) {
-    if (error.message.includes('already exists')) {
+    // Check for duplicate email error specifically
+    if (error.message.includes('already exists') || error.message.includes('duplicate key')) {
       return res.status(409).json({
         error: 'User already exists',
-        message: error.message
+        message: 'A user with this email already exists'
       });
     }
 
@@ -85,6 +86,14 @@ const login = async (req, res) => {
       token
     });
   } catch (error) {
+    // Handle database errors specifically
+    if (error.message.includes('database')) {
+      return res.status(500).json({
+        error: 'Login failed',
+        message: 'Database error occurred during login'
+      });
+    }
+
     res.status(500).json({
       error: 'Login failed',
       message: error.message
