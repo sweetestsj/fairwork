@@ -65,7 +65,7 @@ const createService = async (req, res) => {
       data: newService
     });
   } catch (error) {
-    // Check for duplicate key error using proper PostgreSQL error code checking instead of fragile string matching
+    // Check for duplicate key error using proper PostgreSQL error code checking
     if (error && error.code === '23505') { // PostgreSQL duplicate key error code
       return res.status(400).json({
         success: false,
@@ -73,15 +73,12 @@ const createService = async (req, res) => {
       });
     }
 
-    // Check for null/undefined error.message to prevent potential null reference
-    if (error && error.message) {
-      // Handle specific PostgreSQL duplicate key error by checking error code first
-      if (error.message.includes('duplicate key')) {
-        return res.status(400).json({
-          success: false,
-          error: 'Service with this name already exists'
-        });
-      }
+    // Check for specific PostgreSQL duplicate key error in message (fallback)
+    if (error && error.message && error.message.includes('duplicate key')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Service with this name already exists'
+      });
     }
 
     res.status(400).json({
