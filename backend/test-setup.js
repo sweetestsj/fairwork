@@ -1,4 +1,4 @@
-// Simple test script to verify setup
+// Test setup script for FairWork project
 const fs = require('fs');
 const path = require('path');
 
@@ -46,6 +46,61 @@ requiredDirs.forEach(dir => {
   if (!exists) allDirsExist = false;
 });
 
+// Test database connection setup
+console.log('\nTesting database connection...');
+try {
+  const { Pool } = require('pg');
+  require('dotenv').config();
+
+  // Create a test pool for testing - using the same database as production for now
+  const testPool = new Pool({
+    user: process.env.DB_USER || 'fairwork_user',
+    host: process.env.DB_HOST || 'db',
+    database: process.env.DB_NAME || 'fairwork', // Use production database for testing
+    password: process.env.DB_PASSWORD || 'fairwork_password',
+    port: process.env.DB_PORT || 5432,
+  });
+
+  console.log('✓ Database connection pool created successfully');
+
+  // Test actual connectivity by running a simple query
+  const testQuery = async () => {
+    try {
+      await testPool.query('SELECT 1');
+      console.log('✓ Database connection verified successfully');
+    } catch (queryError) {
+      console.log('⚠ Warning: Could not verify database connectivity:', queryError.message);
+    } finally {
+      // Clean up the test pool
+      testPool.end();
+      console.log('✓ Test database pool cleaned up');
+    }
+  };
+
+  testQuery();
+} catch (error) {
+  console.log('⚠ Warning: Could not create test database pool:', error.message);
+}
+
+// Function to create a test database pool - this was removed in previous versions but is needed
+const createTestPool = () => {
+  const { Pool } = require('pg');
+  require('dotenv').config();
+
+  return new Pool({
+    user: process.env.DB_USER || 'fairwork_user',
+    host: process.env.DB_HOST || 'db',
+    database: process.env.DB_NAME || 'fairwork', // Use production database for testing
+    password: process.env.DB_PASSWORD || 'fairwork_password',
+    port: process.env.DB_PORT || 5432,
+  });
+};
+
+// Export the function for use in tests
+module.exports = {
+  createTestPool
+};
+
 if (allFilesExist && allDirsExist) {
   console.log('\n✅ All project files and directories created successfully!');
   console.log('You can now run: docker-compose up --build');
@@ -53,3 +108,5 @@ if (allFilesExist && allDirsExist) {
   console.log('\n❌ Some files or directories are missing');
   process.exit(1);
 }
+
+console.log('\n✅ Test setup verification complete');

@@ -19,6 +19,10 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Service routes
+const serviceRoutes = require('./routes/services');
+app.use('/services', serviceRoutes);
+
 // Jobs routes
 const jobsRouter = require('./routes/jobs');
 app.use('/api/jobs', jobsRouter);
