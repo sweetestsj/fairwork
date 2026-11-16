@@ -18,9 +18,11 @@ class JobController {
         data: jobs
       });
     } catch (error) {
+      // Ensure error.message is properly handled to prevent null reference
+      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
       res.status(500).json({
         success: false,
-        message: error.message
+        message: errorMessage
       });
     }
   }
@@ -104,9 +106,11 @@ class JobController {
         data: job
       });
     } catch (error) {
+      // Ensure error.message is properly handled to prevent null reference
+      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
       res.status(500).json({
         success: false,
-        message: error.message
+        message: errorMessage
       });
     }
   }
@@ -130,9 +134,11 @@ class JobController {
         data: job
       });
     } catch (error) {
+      // Ensure error.message is properly handled to prevent null reference
+      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
       res.status(500).json({
         success: false,
-        message: error.message
+        message: errorMessage
       });
     }
   }
@@ -165,9 +171,11 @@ class JobController {
         data: job
       });
     } catch (error) {
+      // Ensure error.message is properly handled to prevent null reference
+      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
       res.status(500).json({
         success: false,
-        message: error.message
+        message: errorMessage
       });
     }
   }
@@ -183,9 +191,11 @@ class JobController {
         message: 'Job cancelled successfully'
       });
     } catch (error) {
+      // Ensure error.message is properly handled to prevent null reference
+      const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
       res.status(500).json({
         success: false,
-        message: error.message
+        message: errorMessage
       });
     }
   }
