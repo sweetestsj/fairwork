@@ -10,7 +10,9 @@ class JobController {
   // Get all jobs with optional category filtering
   async getAllJobs(req, res) {
     try {
-      const { category } = req.query;
+      // Ensure req and req.query exist
+      const query = (req && req.query) || {};
+      const { category } = query;
       const jobs = await this.jobModel.getAllJobs(category);
       res.json({
         success: true,
