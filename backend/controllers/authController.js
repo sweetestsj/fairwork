@@ -36,15 +36,29 @@ const register = async (req, res) => {
       token
     });
   } catch (error) {
-    // Check for duplicate email error specifically
-    if (error.message.includes('already exists') || error.message.includes('duplicate key')) {
+    // Check for duplicate email error specifically - looking for the specific error message or code
+    if (error.message.includes('already exists') ||
+        error.message.includes('duplicate key') ||
+        error.code === '23505') {
       return res.status(409).json({
         error: 'User already exists',
         message: 'A user with this email already exists'
       });
     }
 
-    res.status(400).json({
+    // For other validation errors, send 400
+    if (error.message.includes('required') ||
+        error.message.includes('format') ||
+        error.message.includes('length') ||
+        error.message.includes('Role')) {
+      return res.status(400).json({
+        error: 'Registration failed',
+        message: error.message
+      });
+    }
+
+    // For any other database or system errors, send 500
+    res.status(500).json({
       error: 'Registration failed',
       message: error.message
     });
