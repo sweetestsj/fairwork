@@ -37,13 +37,40 @@ const register = async (req, res) => {
     });
   } catch (error) {
     console.error('Registration error:', error); // Add logging for debugging
-    if (error.message.includes('already exists')) {
+
+    // Handle PostgreSQL unique constraint violation (email already exists)
+    if (error.code === '23505') {
+      return res.status(409).json({
+        error: 'User already exists',
+        message: 'A user with this email already exists'
+      });
+    }
+
+    // Handle validation errors
+    if (error.message.includes('already exists') || error.message.includes('duplicate')) {
       return res.status(409).json({
         error: 'User already exists',
         message: error.message
       });
     }
 
+    // Handle other database errors
+    if (error.message.includes('database') || error.message.includes('DB')) {
+      return res.status(500).json({
+        error: 'Database error occurred during registration',
+        message: error.message
+      });
+    }
+
+    // Handle validation errors (from User.validateUserData)
+    if (error.message.includes('required') || error.message.includes('invalid') || error.message.includes('format') || error.message.includes('length')) {
+      return res.status(400).json({
+        error: 'Registration failed',
+        message: error.message
+      });
+    }
+
+    // Default to 400 for other errors (this should be rare)
     res.status(400).json({
       error: 'Registration failed',
       message: error.message
@@ -87,6 +114,16 @@ const login = async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error); // Add logging for debugging
+
+    // If it's a database-related error, return 500
+    if (error.message.includes('database') || error.message.includes('DB')) {
+      return res.status(500).json({
+        error: 'Database error occurred during login',
+        message: error.message
+      });
+    }
+
+    // For other errors, return 500 as a fallback
     res.status(500).json({
       error: 'Login failed',
       message: error.message
