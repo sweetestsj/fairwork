@@ -27,9 +27,15 @@ app.use('/services', serviceRoutes);
 const jobsRouter = require('./routes/jobs');
 app.use('/api/jobs', jobsRouter);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Authentication routes
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
+
+// Start server only if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
 module.exports = app;
