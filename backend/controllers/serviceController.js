@@ -74,16 +74,18 @@ const createService = async (req, res) => {
     }
 
     // Check for specific PostgreSQL duplicate key error in message (fallback)
-    if (error && error.message && error.message.includes('duplicate key')) {
+    if (error && error.message && typeof error.message === 'string' && error.message.includes('duplicate key')) {
       return res.status(400).json({
         success: false,
         error: 'Service with this name already exists'
       });
     }
 
+    // Ensure error.message is properly handled to prevent null reference
+    const errorMessage = error && error.message ? error.message : 'An unknown error occurred';
     res.status(400).json({
       success: false,
-      error: error.message
+      error: errorMessage
     });
   }
 };

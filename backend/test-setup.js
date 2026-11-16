@@ -52,11 +52,11 @@ try {
   const { Pool } = require('pg');
   require('dotenv').config();
 
-  // Create a test pool for testing
+  // Create a test pool for testing - using the same database as production for now
   const testPool = new Pool({
     user: process.env.DB_USER || 'fairwork_user',
     host: process.env.DB_HOST || 'db',
-    database: process.env.DB_NAME || 'fairwork',
+    database: process.env.DB_NAME || 'fairwork', // Use production database for testing
     password: process.env.DB_PASSWORD || 'fairwork_password',
     port: process.env.DB_PORT || 5432,
   });

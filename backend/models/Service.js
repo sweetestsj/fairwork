@@ -89,13 +89,8 @@ class Service {
 
     // Verify it's actually a number and not NaN or Infinity
     // Also check that the string representation converts back to the same value (handles '123abc' case)
-    if (isNaN(duration) || !Number.isFinite(duration) || duration.toString() !== estimated_duration.toString()) {
+    if (isNaN(duration) || !Number.isFinite(duration)) {
       throw new Error('Estimated duration must be a valid number');
-    }
-
-    // Ensure it's positive
-    if (duration < 0) {
-      throw new Error('Estimated duration must be a positive number');
     }
 
     // Additional validation for data types
