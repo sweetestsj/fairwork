@@ -84,12 +84,13 @@ class Service {
       throw new Error('Estimated duration is required');
     }
 
-    // Check if estimated_duration can be converted to a valid number
+    // More robust validation for numeric fields
+    // Check if it's a valid number and that the string representation converts back to the same value
     const duration = Number(estimated_duration);
 
     // Verify it's actually a number and not NaN or Infinity
     // Also check that the string representation converts back to the same value (handles '123abc' case)
-    if (isNaN(duration) || !Number.isFinite(duration)) {
+    if (isNaN(duration) || !Number.isFinite(duration) || String(duration) !== String(estimated_duration)) {
       throw new Error('Estimated duration must be a valid number');
     }
 

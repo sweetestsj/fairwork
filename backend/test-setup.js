@@ -82,6 +82,25 @@ try {
   console.log('⚠ Warning: Could not create test database pool:', error.message);
 }
 
+// Function to create a test database pool - this was removed in previous versions but is needed
+const createTestPool = () => {
+  const { Pool } = require('pg');
+  require('dotenv').config();
+
+  return new Pool({
+    user: process.env.DB_USER || 'fairwork_user',
+    host: process.env.DB_HOST || 'db',
+    database: process.env.DB_NAME || 'fairwork', // Use production database for testing
+    password: process.env.DB_PASSWORD || 'fairwork_password',
+    port: process.env.DB_PORT || 5432,
+  });
+};
+
+// Export the function for use in tests
+module.exports = {
+  createTestPool
+};
+
 if (allFilesExist && allDirsExist) {
   console.log('\n✅ All project files and directories created successfully!');
   console.log('You can now run: docker-compose up --build');

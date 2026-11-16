@@ -82,7 +82,7 @@ const createService = async (req, res) => {
     }
 
     // Ensure error.message is properly handled to prevent null reference
-    const errorMessage = error && error.message ? error.message : 'An unknown error occurred';
+    const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
     res.status(400).json({
       success: false,
       error: errorMessage
