@@ -38,6 +38,14 @@ const register = async (req, res) => {
   } catch (error) {
     console.error('Registration error:', error); // Add logging for debugging
 
+    // Handle database connection errors (like ENOTFOUND)
+    if (error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
+      return res.status(503).json({
+        error: 'Service unavailable',
+        message: 'Database connection failed'
+      });
+    }
+
     // Handle PostgreSQL unique constraint violation (email already exists)
     if (error.code === '23505') {
       return res.status(409).json({
@@ -59,14 +67,6 @@ const register = async (req, res) => {
       return res.status(400).json({
         error: 'Registration failed',
         message: error.message
-      });
-    }
-
-    // Handle database connection errors (like ENOTFOUND)
-    if (error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
-      return res.status(503).json({
-        error: 'Service unavailable',
-        message: 'Database connection failed'
       });
     }
 
