@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { authService } from '../services/api';
+import { userService } from '../services/api';
 import './Profile.css';
 
 const Profile = () => {
@@ -17,13 +17,18 @@ const Profile = () => {
           return;
         }
 
-        // In a real app, you would typically get user info from the backend
-        // For now, we'll just display what's in local storage or mock data
-        const userData = JSON.parse(localStorage.getItem('user')) || null;
-        setUser(userData);
+        // Fetch user profile from backend API
+        const userData = await userService.getProfile();
+        setUser(userData.user);
       } catch (err) {
-        setError('Failed to fetch profile information');
         console.error('Error fetching profile:', err);
+        if (err.response?.status === 401) {
+          // Token is invalid, redirect to login
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        } else {
+          setError('Failed to fetch profile information');
+        }
       } finally {
         setLoading(false);
       }
