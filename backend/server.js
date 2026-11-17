@@ -33,7 +33,7 @@ app.use('/auth', authRoutes);
 
 // Profile routes
 const profileRoutes = require('./routes/profile');
-app.use('/', profileRoutes);
+app.use('/auth', profileRoutes);
 
 // Start server only if not in test environment
 if (process.env.NODE_ENV !== 'test') {
