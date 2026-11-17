@@ -28,7 +28,14 @@ const LoginForm = ({ onLogin }) => {
       localStorage.setItem('token', response.token);
       onLogin(response.user);
     } catch (err) {
-      setError('Invalid email or password');
+      // Handle different types of errors from backend
+      if (err.response && err.response.data) {
+        setError(err.response.data.message || 'Invalid email or password');
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred during login');
+      }
       console.error('Login error:', err);
     } finally {
       setLoading(false);

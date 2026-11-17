@@ -40,7 +40,14 @@ const RegisterForm = ({ onRegister }) => {
       localStorage.setItem('token', response.token);
       onRegister(response.user);
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      // Handle different types of errors from backend
+      if (err.response && err.response.data) {
+        setError(err.response.data.message || 'Registration failed. Please try again.');
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred during registration');
+      }
       console.error('Registration error:', err);
     } finally {
       setLoading(false);
