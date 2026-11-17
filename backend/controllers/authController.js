@@ -19,6 +19,19 @@ const validateRequestBody = (req, res, requiredFields) => {
     });
   }
 
+  // Special handling for login endpoint - check if all required fields are missing
+  if (requiredFields.length === 2 && requiredFields.includes('email') && requiredFields.includes('password')) {
+    const emailMissing = !req.body.email;
+    const passwordMissing = !req.body.password;
+
+    if (emailMissing && passwordMissing) {
+      return res.status(400).json({
+        error: 'Email and password are required'
+      });
+    }
+  }
+
+  // General validation for other endpoints
   for (const field of requiredFields) {
     if (!req.body[field]) {
       return res.status(400).json({
