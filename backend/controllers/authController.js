@@ -11,9 +11,32 @@ const generateToken = (user) => {
   );
 };
 
+// Helper function to validate request body
+const validateRequestBody = (req, res, requiredFields) => {
+  if (!req.body) {
+    return res.status(400).json({
+      error: 'Request body is required'
+    });
+  }
+
+  for (const field of requiredFields) {
+    if (!req.body[field]) {
+      return res.status(400).json({
+        error: `${field} is required`
+      });
+    }
+  }
+
+  return null; // No error, validation passed
+};
+
 // Registration endpoint
 const register = async (req, res) => {
   try {
+    // Validate request body
+    const validationError = validateRequestBody(req, res, ['name', 'email', 'password', 'role']);
+    if (validationError) return validationError;
+
     const { name, email, password, role } = req.body;
 
     // Validate input data
@@ -89,13 +112,11 @@ const register = async (req, res) => {
 // Login endpoint
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    // Validate request body
+    const validationError = validateRequestBody(req, res, ['email', 'password']);
+    if (validationError) return validationError;
 
-    if (!email || !password) {
-      return res.status(400).json({
-        error: 'Email and password are required'
-      });
-    }
+    const { email, password } = req.body;
 
     // Validate credentials
     const user = await User.validateUserCredentials(email, password);
