@@ -13,7 +13,7 @@ const generateToken = (user) => {
 
 // Helper function to validate request body
 const validateRequestBody = (req, res, requiredFields) => {
-  if (!req.body) {
+  if (!req || !req.body) {
     return res.status(400).json({
       error: 'Request body is required'
     });
