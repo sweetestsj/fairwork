@@ -36,6 +36,16 @@ const register = async (req, res) => {
       token
     });
   } catch (error) {
+    console.error('Registration error:', error); // Add logging for debugging
+
+    // Handle database connection errors (like ENOTFOUND)
+    if (error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
+      return res.status(503).json({
+        error: 'Service unavailable',
+        message: 'Database connection failed'
+      });
+    }
+
     // Handle PostgreSQL unique constraint violation (email already exists)
     if (error.code === '23505') {
       return res.status(409).json({
@@ -52,18 +62,18 @@ const register = async (req, res) => {
       });
     }
 
-    // Handle other database errors
-    if (error.message.includes('database') || error.message.includes('DB')) {
-      return res.status(500).json({
-        error: 'Database error occurred during registration',
-        message: error.message
-      });
-    }
-
     // Handle validation errors (from User.validateUserData)
     if (error.message.includes('required') || error.message.includes('invalid') || error.message.includes('format') || error.message.includes('length')) {
       return res.status(400).json({
         error: 'Registration failed',
+        message: error.message
+      });
+    }
+
+    // Handle other database errors
+    if (error.message.includes('database') || error.message.includes('DB')) {
+      return res.status(500).json({
+        error: 'Database error occurred during registration',
         message: error.message
       });
     }
@@ -111,6 +121,16 @@ const login = async (req, res) => {
       token
     });
   } catch (error) {
+    console.error('Login error:', error); // Add logging for debugging
+
+    // Handle database connection errors (like ENOTFOUND)
+    if (error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
+      return res.status(503).json({
+        error: 'Service unavailable',
+        message: 'Database connection failed'
+      });
+    }
+
     // If it's a database-related error, return 500
     if (error.message.includes('database') || error.message.includes('DB')) {
       return res.status(500).json({
