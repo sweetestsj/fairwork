@@ -7,13 +7,21 @@ class JobController {
     this.jobModel = new Job(db);
   }
 
-  // Get all jobs with optional category filtering
+  // Get all jobs with optional filtering
   async getAllJobs(req, res) {
     try {
       // Ensure req and req.query exist
       const query = (req && req.query) || {};
-      const { category } = query;
-      const jobs = await this.jobModel.getAllJobs(category);
+      const { category, minPrice, maxPrice, datePosted } = query;
+
+      // Build filter object for the database query
+      const filters = {};
+      if (category) filters.category = category;
+      if (minPrice) filters.minPrice = parseFloat(minPrice);
+      if (maxPrice) filters.maxPrice = parseFloat(maxPrice);
+      if (datePosted) filters.datePosted = datePosted;
+
+      const jobs = await this.jobModel.getAllJobs(filters);
       res.json({
         success: true,
         count: jobs.length,
