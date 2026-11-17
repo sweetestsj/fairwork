@@ -10,7 +10,9 @@ const ServicesList = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const data = await serviceService.getServices();
+        const response = await serviceService.getServices();
+        // Extract the data array from API response structure
+        const data = Array.isArray(response) ? response : (response?.data || []);
         setServices(data);
       } catch (err) {
         setError('Failed to fetch services');

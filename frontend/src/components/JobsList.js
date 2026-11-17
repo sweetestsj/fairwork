@@ -10,7 +10,9 @@ const JobsList = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const data = await jobService.getJobs();
+        const response = await jobService.getJobs();
+        // Extract the data array from API response structure
+        const data = Array.isArray(response) ? response : (response?.data || []);
         setJobs(data);
       } catch (err) {
         setError('Failed to fetch jobs');
