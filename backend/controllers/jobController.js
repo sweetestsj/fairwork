@@ -74,7 +74,8 @@ class JobController {
         });
       }
 
-      const jobs = await this.jobModel.getAllJobs(sanitizedCategory);
+      // Pass filters as an object instead of a string to getAllJobs
+      const jobs = await this.jobModel.getAllJobs({ category: sanitizedCategory });
       res.json({
         success: true,
         count: jobs.length,
