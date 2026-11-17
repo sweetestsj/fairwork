@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { authService } from '../services/api';
 import './RegisterForm.css';
 
-const RegisterForm = () => {
+const RegisterForm = ({ onRegister }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,15 +32,16 @@ const RegisterForm = () => {
     }
 
     try {
-      await axios.post('/api/auth/register', {
+      const response = await authService.register({
         name: formData.name,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       });
-      // Redirect to login page after successful registration
-      window.location.href = '/login';
+      localStorage.setItem('token', response.token);
+      onRegister(response.user);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError('Registration failed. Please try again.');
+      console.error('Registration error:', err);
     } finally {
       setLoading(false);
     }
@@ -48,11 +49,11 @@ const RegisterForm = () => {
 
   return (
     <div className="register-form">
-      <h2>Register</h2>
+      <h1>Register</h1>
       {error && <div className="error-message">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="name">Name:</label>
+          <label htmlFor="name">Full Name</label>
           <input
             type="text"
             id="name"
@@ -63,7 +64,7 @@ const RegisterForm = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="email">Email:</label>
+          <label htmlFor="email">Email</label>
           <input
             type="email"
             id="email"
@@ -74,7 +75,7 @@ const RegisterForm = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="password">Password:</label>
+          <label htmlFor="password">Password</label>
           <input
             type="password"
             id="password"
@@ -85,7 +86,7 @@ const RegisterForm = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="confirmPassword">Confirm Password:</label>
+          <label htmlFor="confirmPassword">Confirm Password</label>
           <input
             type="password"
             id="confirmPassword"

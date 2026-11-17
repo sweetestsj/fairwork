@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { serviceService } from '../services/api';
 import './ServicesList.css';
 
 const ServicesList = () => {
@@ -10,11 +10,12 @@ const ServicesList = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await axios.get('/api/services');
-        setServices(response.data);
-        setLoading(false);
+        const data = await serviceService.getServices();
+        setServices(data);
       } catch (err) {
-        setError(err.message);
+        setError('Failed to fetch services');
+        console.error('Error fetching services:', err);
+      } finally {
         setLoading(false);
       }
     };
@@ -22,26 +23,27 @@ const ServicesList = () => {
     fetchServices();
   }, []);
 
-  if (loading) return <div className="loading">Loading services...</div>;
-  if (error) return <div className="error">Error: {error}</div>;
+  if (loading) {
+    return <div className="services-list loading">Loading services...</div>;
+  }
+
+  if (error) {
+    return <div className="services-list error">{error}</div>;
+  }
 
   return (
     <div className="services-list">
-      <h2>Available Services</h2>
-      {services.length > 0 ? (
-        <ul className="services-grid">
-          {services.map(service => (
-            <li key={service.id} className="service-card">
-              <h3>{service.title}</h3>
-              <p>{service.description}</p>
-              <p><strong>Price:</strong> ${service.price}</p>
-              <p><strong>Category:</strong> {service.category}</p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No services available.</p>
-      )}
+      <h1>Available Services</h1>
+      <div className="services-grid">
+        {services.map((service) => (
+          <div key={service.id} className="service-card">
+            <h2>{service.title}</h2>
+            <p className="service-description">{service.description}</p>
+            <p className="service-price">Price: ${service.price}</p>
+            <p className="service-provider">Provider: {service.providerName}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

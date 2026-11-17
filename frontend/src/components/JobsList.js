@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { jobService } from '../services/api';
 import './JobsList.css';
 
 const JobsList = () => {
@@ -10,11 +10,12 @@ const JobsList = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await axios.get('/api/jobs');
-        setJobs(response.data);
-        setLoading(false);
+        const data = await jobService.getJobs();
+        setJobs(data);
       } catch (err) {
-        setError(err.message);
+        setError('Failed to fetch jobs');
+        console.error('Error fetching jobs:', err);
+      } finally {
         setLoading(false);
       }
     };
@@ -22,27 +23,27 @@ const JobsList = () => {
     fetchJobs();
   }, []);
 
-  if (loading) return <div className="loading">Loading jobs...</div>;
-  if (error) return <div className="error">Error: {error}</div>;
+  if (loading) {
+    return <div className="jobs-list loading">Loading jobs...</div>;
+  }
+
+  if (error) {
+    return <div className="jobs-list error">{error}</div>;
+  }
 
   return (
     <div className="jobs-list">
-      <h2>Available Jobs</h2>
-      {jobs.length > 0 ? (
-        <ul className="jobs-grid">
-          {jobs.map(job => (
-            <li key={job.id} className="job-card">
-              <h3>{job.title}</h3>
-              <p>{job.description}</p>
-              <p><strong>Salary:</strong> ${job.salary}</p>
-              <p><strong>Location:</strong> {job.location}</p>
-              <p><strong>Status:</strong> {job.status}</p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No jobs available.</p>
-      )}
+      <h1>Available Jobs</h1>
+      <div className="jobs-grid">
+        {jobs.map((job) => (
+          <div key={job.id} className="job-card">
+            <h2>{job.title}</h2>
+            <p className="job-description">{job.description}</p>
+            <p className="job-budget">Budget: ${job.budget}</p>
+            <p className="job-posted">Posted: {new Date(job.postedAt).toLocaleDateString()}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

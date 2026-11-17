@@ -1,26 +1,52 @@
 .services-list {
+  padding: 2rem 0;
+}
+
+.services-list h1 {
+  text-align: center;
+  color: #343a40;
+  margin-bottom: 2rem;
+}
+
+.loading, .error {
+  text-align: center;
   padding: 2rem;
+  font-size: 1.2rem;
+}
+
+.error {
+  color: #dc3545;
 }
 
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
-  margin-top: 2rem;
 }
 
 .service-card {
-  background-color: #ecf0f1;
-  padding: 2rem;
+  background-color: white;
+  padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.service-card h3 {
-  color: #2c3e50;
-  margin-bottom: 1rem;
+.service-card h2 {
+  color: #343a40;
+  margin-bottom: 0.5rem;
 }
 
-.service-card p {
-  margin: 0.5rem 0;
+.service-description {
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.service-price {
+  font-weight: bold;
+  color: #28a745;
+  margin-bottom: 0.5rem;
+}
+
+.service-provider {
+  color: #6c757d;
 }

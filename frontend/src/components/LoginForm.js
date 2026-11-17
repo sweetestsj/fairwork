@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { authService } from '../services/api';
 import './LoginForm.css';
 
-const LoginForm = () => {
+const LoginForm = ({ onLogin }) => {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,13 +24,12 @@ const LoginForm = () => {
     setError('');
 
     try {
-      const response = await axios.post('/api/auth/login', formData);
-      // Store token in localStorage or context
-      localStorage.setItem('token', response.data.token);
-      // Redirect to home or dashboard
-      window.location.href = '/';
+      const response = await authService.login(formData);
+      localStorage.setItem('token', response.token);
+      onLogin(response.user);
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError('Invalid email or password');
+      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
@@ -38,11 +37,11 @@ const LoginForm = () => {
 
   return (
     <div className="login-form">
-      <h2>Login</h2>
+      <h1>Login</h1>
       {error && <div className="error-message">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="email">Email:</label>
+          <label htmlFor="email">Email</label>
           <input
             type="email"
             id="email"
@@ -53,7 +52,7 @@ const LoginForm = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="password">Password:</label>
+          <label htmlFor="password">Password</label>
           <input
             type="password"
             id="password"
