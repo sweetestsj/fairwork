@@ -4,6 +4,7 @@ import Navigation from './components/Navigation';
 import Home from './components/Home';
 import ServicesList from './components/ServicesList';
 import JobsList from './components/JobsList';
+import Profile from './components/Profile';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import './App.css';
@@ -41,6 +42,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/services" element={<ServicesList />} />
             <Route path="/jobs" element={<JobsList />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/login" element={<LoginForm onLogin={handleLogin} />} />
             <Route path="/register" element={<RegisterForm onRegister={handleLogin} />} />
           </Routes>
