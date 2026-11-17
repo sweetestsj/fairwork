@@ -23,9 +23,6 @@ services:
       - db
     ports:
       - "3000:3000"
-    volumes:
-      - ./backend:/app/backend
-      - /app/backend/node_modules
 
   # Frontend
   frontend:
@@ -36,9 +33,6 @@ services:
       - backend
     ports:
       - "3001:3001"
-    volumes:
-      - ./frontend:/app/frontend
-      - /app/frontend/node_modules
 
 volumes:
   postgres_data:
