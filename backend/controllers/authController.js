@@ -11,6 +11,36 @@ const generateToken = (user) => {
   );
 };
 
+// Handle database connection errors consistently
+const handleDatabaseError = (error, operation) => {
+  console.error(`${operation} error:`, error); // Add logging for debugging
+
+  // Handle database connection errors (like ENOTFOUND)
+  if (error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
+    return {
+      status: 503,
+      error: 'Service unavailable',
+      message: 'Database connection failed'
+    };
+  }
+
+  // If it's a database-related error, return 500
+  if (error.message.includes('database') || error.message.includes('DB')) {
+    return {
+      status: 500,
+      error: `Database error occurred during ${operation}`,
+      message: error.message
+    };
+  }
+
+  // For other errors, return 500 as a fallback
+  return {
+    status: 500,
+    error: `${operation} failed`,
+    message: error.message
+  };
+};
+
 // Registration endpoint
 const register = async (req, res) => {
   try {
@@ -36,15 +66,8 @@ const register = async (req, res) => {
       token
     });
   } catch (error) {
-    console.error('Registration error:', error); // Add logging for debugging
-
-    // Handle database connection errors (like ENOTFOUND)
-    if (error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
-      return res.status(503).json({
-        error: 'Service unavailable',
-        message: 'Database connection failed'
-      });
-    }
+    // Handle database connection errors consistently
+    const errorResponse = handleDatabaseError(error, 'registration');
 
     // Handle PostgreSQL unique constraint violation (email already exists)
     if (error.code === '23505') {
@@ -72,9 +95,9 @@ const register = async (req, res) => {
 
     // Handle other database errors
     if (error.message.includes('database') || error.message.includes('DB')) {
-      return res.status(500).json({
-        error: 'Database error occurred during registration',
-        message: error.message
+      return res.status(errorResponse.status).json({
+        error: errorResponse.error,
+        message: errorResponse.message
       });
     }
 
@@ -121,21 +144,14 @@ const login = async (req, res) => {
       token
     });
   } catch (error) {
-    console.error('Login error:', error); // Add logging for debugging
+    // Handle database connection errors consistently
+    const errorResponse = handleDatabaseError(error, 'login');
 
-    // Handle database connection errors (like ENOTFOUND)
-    if (error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
-      return res.status(503).json({
-        error: 'Service unavailable',
-        message: 'Database connection failed'
-      });
-    }
-
-    // If it's a database-related error, return 500
+    // For other database errors, return the appropriate status code
     if (error.message.includes('database') || error.message.includes('DB')) {
-      return res.status(500).json({
-        error: 'Database error occurred during login',
-        message: error.message
+      return res.status(errorResponse.status).json({
+        error: errorResponse.error,
+        message: errorResponse.message
       });
     }
 
