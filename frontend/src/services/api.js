@@ -60,8 +60,8 @@ export const serviceService = {
 };
 
 export const jobService = {
-  getJobs: async () => {
-    const response = await api.get('/jobs');
+  getJobs: async (sort = 'date') => {
+    const response = await api.get('/jobs', { params: { sort } });
     return response.data;
   },
 

@@ -6,11 +6,12 @@ const JobsList = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sortOption, setSortOption] = useState('date'); // default sorting by date
 
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchJobs = async (sort = 'date') => {
       try {
-        const response = await jobService.getJobs();
+        const response = await jobService.getJobs(sort);
         // Extract the data array from API response structure
         const data = Array.isArray(response) ? response : (response?.data || []);
         setJobs(data);
@@ -22,8 +23,12 @@ const JobsList = () => {
       }
     };
 
-    fetchJobs();
-  }, []);
+    fetchJobs(sortOption);
+  }, [sortOption]);
+
+  const handleSortChange = (event) => {
+    setSortOption(event.target.value);
+  };
 
   if (loading) {
     return <div className="jobs-list loading">Loading jobs...</div>;
@@ -36,6 +41,17 @@ const JobsList = () => {
   return (
     <div className="jobs-list">
       <h1>Available Jobs</h1>
+
+      {/* Sorting controls */}
+      <div className="sort-controls">
+        <label htmlFor="sort-options">Sort by: </label>
+        <select id="sort-options" value={sortOption} onChange={handleSortChange}>
+          <option value="date">Date Posted (Newest First)</option>
+          <option value="budget">Budget (Highest First)</option>
+          <option value="category">Category</option>
+        </select>
+      </div>
+
       <div className="jobs-grid">
         {jobs.map((job) => (
           <div key={job.id} className="job-card">

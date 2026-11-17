@@ -5,11 +5,11 @@ class Job {
     this.db = db;
   }
 
-  // Get all jobs with optional filtering by service category
-  async getAllJobs(category = null) {
+  // Get all jobs with optional filtering by service category and sorting
+  async getAllJobs(category = null, sort = 'date') {
     let query = `
       SELECT j.id, j.title, j.description, s.category, j.created_at,
-             j.updated_at, j.status, u.name as provider_name
+             j.updated_at, j.status, u.name as provider_name, j.budget
       FROM jobs j
       JOIN users u ON j.homeowner_id = u.id
       JOIN services s ON j.service_id = s.id
@@ -23,7 +23,19 @@ class Job {
       params.push(category);
     }
 
-    query += ` ORDER BY j.created_at DESC`;
+    // Apply sorting based on the sort parameter
+    switch (sort) {
+      case 'budget':
+        query += ` ORDER BY j.budget DESC`;
+        break;
+      case 'category':
+        query += ` ORDER BY s.category`;
+        break;
+      case 'date':
+      default:
+        query += ` ORDER BY j.created_at DESC`;
+        break;
+    }
 
     try {
       const result = await this.db.query(query, params);
