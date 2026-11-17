@@ -10,6 +10,7 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
 });
 
+// Export the pool for testing
 module.exports = {
   query: (text, params) => pool.query(text, params),
 };

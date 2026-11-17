@@ -6,6 +6,7 @@ import ServicesList from './components/ServicesList';
 import JobsList from './components/JobsList';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
+import Profile from './components/Profile';
 import './App.css';
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
             <Route path="/jobs" element={<JobsList />} />
             <Route path="/login" element={<LoginForm onLogin={handleLogin} />} />
             <Route path="/register" element={<RegisterForm onRegister={handleLogin} />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
       </div>

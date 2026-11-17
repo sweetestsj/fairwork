@@ -40,6 +40,13 @@ export const authService = {
   },
 };
 
+export const userService = {
+  getProfile: async () => {
+    const response = await api.get('/auth/profile');
+    return response.data;
+  },
+};
+
 export const serviceService = {
   getServices: async () => {
     const response = await api.get('/services');

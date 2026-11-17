@@ -31,6 +31,10 @@ app.use('/api/jobs', jobsRouter);
 const authRoutes = require('./routes/auth');
 app.use('/auth', authRoutes);
 
+// Profile routes
+const profileRoutes = require('./routes/profile');
+app.use('/auth', profileRoutes);
+
 // Start server only if not in test environment
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {

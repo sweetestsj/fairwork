@@ -147,6 +147,28 @@ const login = async (req, res) => {
   }
 };
 
+// Get user profile endpoint (protected route)
+const getProfile = async (req, res) => {
+  try {
+    // The user is already authenticated via middleware
+    const user = req.user;
+
+    // Remove password hash from the user object if it exists
+    const { password_hash, ...userWithoutHash } = user;
+
+    res.status(200).json({
+      message: 'Profile retrieved successfully',
+      user: userWithoutHash
+    });
+  } catch (error) {
+    console.error('Profile retrieval error:', error);
+    res.status(500).json({
+      error: 'Failed to retrieve profile',
+      message: error.message
+    });
+  }
+};
+
 // Logout endpoint (client-side token removal)
 const logout = async (req, res) => {
   // For JWT tokens, logout is handled client-side by removing the token
@@ -159,5 +181,6 @@ const logout = async (req, res) => {
 module.exports = {
   register,
   login,
+  getProfile,
   logout
 };
