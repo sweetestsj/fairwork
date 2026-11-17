@@ -36,8 +36,6 @@ const register = async (req, res) => {
       token
     });
   } catch (error) {
-    console.error('Registration error:', error); // Add logging for debugging
-
     // Handle database connection errors (like ENOTFOUND)
     if (error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
       return res.status(503).json({
@@ -121,8 +119,6 @@ const login = async (req, res) => {
       token
     });
   } catch (error) {
-    console.error('Login error:', error); // Add logging for debugging
-
     // Handle database connection errors (like ENOTFOUND)
     if (error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
       return res.status(503).json({
