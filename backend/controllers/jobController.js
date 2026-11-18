@@ -21,12 +21,18 @@ class JobController {
       if (maxPrice) filters.maxPrice = parseFloat(maxPrice);
       if (datePosted) filters.datePosted = datePosted;
 
-      // Determine sort order
-      let sortOrder = 'created_at DESC';
+      // Determine sort order with enhanced sorting options
+      let sortOrder = 'j.created_at DESC';
       if (sort === 'budget') {
-        sortOrder = 'budget DESC';
+        sortOrder = 'j.budget DESC';
       } else if (sort === 'category') {
         sortOrder = 's.category ASC';
+      } else if (sort === 'date') {
+        sortOrder = 'j.created_at DESC';
+      } else if (sort === 'date_asc') {
+        sortOrder = 'j.created_at ASC';
+      } else if (sort === 'title') {
+        sortOrder = 'j.title ASC';
       }
 
       const jobs = await this.jobModel.getAllJobs(filters, sortOrder);
