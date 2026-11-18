@@ -16,8 +16,6 @@ const JobsList = () => {
     title: ''
   });
   const [sortOption, setSortOption] = useState('date'); // default sort by date
-  const [userLocation, setUserLocation] = useState(null);
-  const [geolocationError, setGeolocationError] = useState(null);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -81,7 +79,7 @@ const JobsList = () => {
       filtered = filtered.filter(job => job.status === filters.status);
     }
 
-    
+
     // Apply sorting
     const sortedJobs = [...filtered];
     switch (sortOption) {
@@ -105,7 +103,7 @@ const JobsList = () => {
     }
 
     setFilteredJobs(sortedJobs);
-  }, [filters, jobs, sortOption, userLocation]);
+  }, [filters, jobs, sortOption]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -140,13 +138,6 @@ const JobsList = () => {
   return (
     <div className="jobs-list">
       <h1>Available Jobs</h1>
-
-      {/* Geolocation error message */}
-      {geolocationError && (
-        <div className="geolocation-error">
-          <p>{geolocationError}</p>
-        </div>
-      )}
 
       {/* Sort and Filter Controls */}
       <div className="job-filters">
