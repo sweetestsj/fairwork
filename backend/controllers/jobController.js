@@ -7,14 +7,30 @@ class JobController {
     this.jobModel = new Job(db);
   }
 
-  // Get all jobs with optional category filtering
+  // Get all jobs with optional filtering and sorting
   async getAllJobs(req, res) {
     try {
       // Ensure req and req.query exist to prevent "Cannot read properties of undefined (reading 'query')"
       const request = req || {};
       const query = (request && request.query) || {};
-      const { category } = query;
-      const jobs = await this.jobModel.getAllJobs(category);
+      const { category, minPrice, maxPrice, datePosted, sort } = query;
+
+      // Build filter object for the database query
+      const filters = {};
+      if (category) filters.category = category;
+      if (minPrice) filters.minPrice = parseFloat(minPrice);
+      if (maxPrice) filters.maxPrice = parseFloat(maxPrice);
+      if (datePosted) filters.datePosted = datePosted;
+
+      // Determine sort order
+      let sortOrder = 'created_at DESC';
+      if (sort === 'budget') {
+        sortOrder = 'budget DESC';
+      } else if (sort === 'category') {
+        sortOrder = 's.category ASC';
+      }
+
+      const jobs = await this.jobModel.getAllJobs(filters, sortOrder);
       res.json({
         success: true,
         count: jobs.length,
@@ -69,7 +85,8 @@ class JobController {
         });
       }
 
-      const jobs = await this.jobModel.getAllJobs(sanitizedCategory);
+      // Pass filters as an object instead of a string to getAllJobs
+      const jobs = await this.jobModel.getAllJobs({ category: sanitizedCategory }, 'j.created_at DESC');
       res.json({
         success: true,
         count: jobs.length,

@@ -5,11 +5,11 @@ class Job {
     this.db = db;
   }
 
-  // Get all jobs with optional filtering by service category
-  async getAllJobs(category = null) {
+  // Get all jobs with optional filtering and sorting
+  async getAllJobs(filters = {}, sortOrder = 'j.created_at DESC') {
     let query = `
       SELECT j.id, j.title, j.description, s.category, j.created_at,
-             j.updated_at, j.status, u.name as provider_name
+             j.updated_at, j.status, u.name as provider_name, j.budget
       FROM jobs j
       JOIN users u ON j.homeowner_id = u.id
       JOIN services s ON j.service_id = s.id
@@ -17,13 +17,39 @@ class Job {
     `;
 
     let params = [];
+    let paramIndex = 1;
 
-    if (category) {
-      query += ` AND s.category = $1`;
-      params.push(category);
+    // Filter by category
+    if (filters.category) {
+      query += ` AND s.category ILIKE $${paramIndex}`;
+      params.push(`%${filters.category}%`);
+      paramIndex++;
     }
 
-    query += ` ORDER BY j.created_at DESC`;
+    // Filter by minimum price
+    if (filters.minPrice !== undefined && filters.minPrice !== null) {
+      query += ` AND j.budget >= $${paramIndex}`;
+      params.push(filters.minPrice);
+      paramIndex++;
+    }
+
+    // Filter by maximum price
+    if (filters.maxPrice !== undefined && filters.maxPrice !== null) {
+      query += ` AND j.budget <= $${paramIndex}`;
+      params.push(filters.maxPrice);
+      paramIndex++;
+    }
+
+    // Filter by date posted
+    if (filters.datePosted) {
+      const date = new Date(filters.datePosted);
+      // Format date for PostgreSQL comparison
+      query += ` AND DATE(j.created_at) = $${paramIndex}`;
+      params.push(date.toISOString().split('T')[0]);
+      paramIndex++;
+    }
+
+    query += ` ORDER BY ${sortOrder}`;
 
     try {
       const result = await this.db.query(query, params);
