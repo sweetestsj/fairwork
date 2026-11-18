@@ -13,7 +13,8 @@ const JobsList = () => {
     maxPrice: '',
     datePosted: '',
     status: '',
-    distance: ''
+    distance: '',
+    title: ''
   });
   const [sortOption, setSortOption] = useState('date'); // default sort by date
   const [userLocation, setUserLocation] = useState(null);
@@ -80,6 +81,13 @@ const JobsList = () => {
     if (filters.category) {
       filtered = filtered.filter(job =>
         job.category && job.category.toLowerCase().includes(filters.category.toLowerCase())
+      );
+    }
+
+    // Filter by title
+    if (filters.title) {
+      filtered = filtered.filter(job =>
+        job.title && job.title.toLowerCase().includes(filters.title.toLowerCase())
       );
     }
 
@@ -163,7 +171,8 @@ const JobsList = () => {
       minPrice: '',
       maxPrice: '',
       datePosted: '',
-      distance: ''
+      distance: '',
+      title: ''
     });
   };
 
@@ -262,6 +271,18 @@ const JobsList = () => {
             <option value="open">Open</option>
             <option value="closed">Closed</option>
           </select>
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="title">Title:</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            placeholder="Search job title"
+            value={filters.title}
+            onChange={handleFilterChange}
+          />
         </div>
 
         <div className="filter-group">
