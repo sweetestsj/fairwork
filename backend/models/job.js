@@ -5,8 +5,8 @@ class Job {
     this.db = db;
   }
 
-  // Get all jobs with optional filtering
-  async getAllJobs(filters = {}) {
+  // Get all jobs with optional filtering and sorting
+  async getAllJobs(filters = {}, sortOrder = 'j.created_at DESC') {
     let query = `
       SELECT j.id, j.title, j.description, s.category, j.created_at,
              j.updated_at, j.status, u.name as provider_name, j.budget
@@ -49,7 +49,7 @@ class Job {
       paramIndex++;
     }
 
-    query += ` ORDER BY j.created_at DESC`;
+    query += ` ORDER BY ${sortOrder}`;
 
     try {
       const result = await this.db.query(query, params);

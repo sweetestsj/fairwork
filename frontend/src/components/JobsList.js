@@ -13,6 +13,7 @@ const JobsList = () => {
     maxPrice: '',
     datePosted: ''
   });
+  const [sortOption, setSortOption] = useState('date'); // default sort by date
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -33,7 +34,7 @@ const JobsList = () => {
     fetchJobs();
   }, []);
 
-  // Apply filters whenever they change
+  // Apply filters and sorting whenever they change
   useEffect(() => {
     let filtered = jobs;
 
@@ -62,8 +63,24 @@ const JobsList = () => {
       });
     }
 
-    setFilteredJobs(filtered);
-  }, [filters, jobs]);
+    // Apply sorting
+    const sortedJobs = [...filtered];
+    switch (sortOption) {
+      case 'date':
+        sortedJobs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        break;
+      case 'budget':
+        sortedJobs.sort((a, b) => b.budget - a.budget);
+        break;
+      case 'category':
+        sortedJobs.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+        break;
+      default:
+        sortedJobs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+
+    setFilteredJobs(sortedJobs);
+  }, [filters, jobs, sortOption]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -82,6 +99,10 @@ const JobsList = () => {
     });
   };
 
+  const handleSortChange = (e) => {
+    setSortOption(e.target.value);
+  };
+
   if (loading) {
     return <div className="jobs-list loading">Loading jobs...</div>;
   }
@@ -94,8 +115,17 @@ const JobsList = () => {
     <div className="jobs-list">
       <h1>Available Jobs</h1>
 
-      {/* Filter Controls */}
+      {/* Sort and Filter Controls */}
       <div className="job-filters">
+        <div className="filter-group">
+          <label htmlFor="sort">Sort by:</label>
+          <select id="sort" value={sortOption} onChange={handleSortChange}>
+            <option value="date">Date Posted (Newest First)</option>
+            <option value="budget">Budget (Highest First)</option>
+            <option value="category">Category</option>
+          </select>
+        </div>
+
         <div className="filter-group">
           <label htmlFor="category">Category:</label>
           <input
