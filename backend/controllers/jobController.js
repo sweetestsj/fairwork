@@ -13,7 +13,7 @@ class JobController {
       // Ensure req and req.query exist to prevent "Cannot read properties of undefined (reading 'query')"
       const request = req || {};
       const query = (request && request.query) || {};
-      const { category, minPrice, maxPrice, datePosted, sort } = query;
+      const { category, minPrice, maxPrice, datePosted, sort, status } = query;
 
       // Build filter object for the database query
       const filters = {};
@@ -21,6 +21,7 @@ class JobController {
       if (minPrice) filters.minPrice = parseFloat(minPrice);
       if (maxPrice) filters.maxPrice = parseFloat(maxPrice);
       if (datePosted) filters.datePosted = datePosted;
+      if (status) filters.status = status;
 
       // Determine sort order with enhanced sorting options
       let sortOrder = 'j.created_at DESC';

@@ -11,7 +11,8 @@ const JobsList = () => {
     category: '',
     minPrice: '',
     maxPrice: '',
-    datePosted: ''
+    datePosted: '',
+    status: ''
   });
   const [sortOption, setSortOption] = useState('date'); // default sort by date
 
@@ -61,6 +62,11 @@ const JobsList = () => {
         const jobDate = new Date(job.created_at);
         return jobDate.toDateString() === selectedDate.toDateString();
       });
+    }
+
+    // Filter by status
+    if (filters.status) {
+      filtered = filtered.filter(job => job.status === filters.status);
     }
 
     // Apply sorting
@@ -179,6 +185,20 @@ const JobsList = () => {
             value={filters.datePosted}
             onChange={handleFilterChange}
           />
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="status">Status:</label>
+          <select
+            id="status"
+            name="status"
+            value={filters.status}
+            onChange={handleFilterChange}
+          >
+            <option value="">All Statuses</option>
+            <option value="open">Open</option>
+            <option value="closed">Closed</option>
+          </select>
         </div>
 
         <button onClick={clearFilters} className="clear-filters-btn">Clear Filters</button>

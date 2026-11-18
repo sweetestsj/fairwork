@@ -13,29 +13,58 @@ class Job {
       FROM jobs j
       JOIN users u ON j.homeowner_id = u.id
       JOIN services s ON j.service_id = s.id
-      WHERE j.status = 'open'
     `;
 
     let params = [];
     let paramIndex = 1;
+    let hasWhereClause = false;
+
+    // Add status filter if provided
+    if (filters.status) {
+      query += ` WHERE j.status = $${paramIndex}`;
+      params.push(filters.status);
+      paramIndex++;
+      hasWhereClause = true;
+    } else {
+      // Default to open jobs only if no status filter is specified
+      if (!hasWhereClause) {
+        query += ` WHERE j.status = 'open'`;
+        hasWhereClause = true;
+      }
+    }
 
     // Filter by category
     if (filters.category) {
-      query += ` AND s.category ILIKE $${paramIndex}`;
+      if (!hasWhereClause) {
+        query += ` WHERE s.category ILIKE $${paramIndex}`;
+        hasWhereClause = true;
+      } else {
+        query += ` AND s.category ILIKE $${paramIndex}`;
+      }
       params.push(`%${filters.category}%`);
       paramIndex++;
     }
 
     // Filter by minimum price
     if (filters.minPrice !== undefined && filters.minPrice !== null) {
-      query += ` AND j.budget >= $${paramIndex}`;
+      if (!hasWhereClause) {
+        query += ` WHERE j.budget >= $${paramIndex}`;
+        hasWhereClause = true;
+      } else {
+        query += ` AND j.budget >= $${paramIndex}`;
+      }
       params.push(filters.minPrice);
       paramIndex++;
     }
 
     // Filter by maximum price
     if (filters.maxPrice !== undefined && filters.maxPrice !== null) {
-      query += ` AND j.budget <= $${paramIndex}`;
+      if (!hasWhereClause) {
+        query += ` WHERE j.budget <= $${paramIndex}`;
+        hasWhereClause = true;
+      } else {
+        query += ` AND j.budget <= $${paramIndex}`;
+      }
       params.push(filters.maxPrice);
       paramIndex++;
     }
@@ -43,8 +72,12 @@ class Job {
     // Filter by date posted
     if (filters.datePosted) {
       const date = new Date(filters.datePosted);
-      // Format date for PostgreSQL comparison
-      query += ` AND DATE(j.created_at) = $${paramIndex}`;
+      if (!hasWhereClause) {
+        query += ` WHERE DATE(j.created_at) = $${paramIndex}`;
+        hasWhereClause = true;
+      } else {
+        query += ` AND DATE(j.created_at) = $${paramIndex}`;
+      }
       params.push(date.toISOString().split('T')[0]);
       paramIndex++;
     }
