@@ -100,7 +100,7 @@ class JobController {
         data: jobs
       });
     } catch (error) {
-      // Handle database errors specifically
+      // Handle database errors specifically - make sure error.message is a string before using .includes()
       if (error && error.message && typeof error.message === 'string' && error.message.includes('invalid input')) {
         return res.status(400).json({
           success: false,
