@@ -88,6 +88,10 @@ class Job {
       const result = await this.db.query(query, params);
       return result.rows;
     } catch (error) {
+      // Handle database connection errors specifically
+      if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
+        throw new Error('Database connection failed. Please try again later.');
+      }
       throw new Error(`Error fetching jobs: ${error.message}`);
     }
   }

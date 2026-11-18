@@ -44,6 +44,14 @@ class JobController {
         data: jobs
       });
     } catch (error) {
+      // Handle database connection errors specifically to prevent 500 errors
+      if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
+        return res.status(503).json({
+          success: false,
+          message: 'Service temporarily unavailable. Please try again later.'
+        });
+      }
+
       // Ensure error.message is properly handled to prevent null reference
       const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
       res.status(500).json({
