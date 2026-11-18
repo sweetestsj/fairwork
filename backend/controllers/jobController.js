@@ -10,8 +10,9 @@ class JobController {
   // Get all jobs with optional filtering and sorting
   async getAllJobs(req, res) {
     try {
-      // Ensure req and req.query exist
-      const query = (req && req.query) || {};
+      // Ensure req and req.query exist to prevent "Cannot read properties of undefined (reading 'query')"
+      const request = req || {};
+      const query = (request && request.query) || {};
       const { category, minPrice, maxPrice, datePosted, sort } = query;
 
       // Build filter object for the database query
@@ -48,7 +49,9 @@ class JobController {
   // Get jobs by category
   async getJobsByCategory(req, res) {
     try {
-      const { category } = req.params;
+      // Ensure req exists to prevent "Cannot read properties of undefined (reading 'params')"
+      const request = req || {};
+      const { category } = request.params;
 
       // Validate that category is provided and is a string
       if (!category) {
@@ -110,7 +113,9 @@ class JobController {
   // Get job by ID
   async getJobById(req, res) {
     try {
-      const { id } = req.params;
+      // Ensure req exists to prevent "Cannot read properties of undefined (reading 'params')"
+      const request = req || {};
+      const { id } = request.params;
       const job = await this.jobModel.getJobById(id);
 
       if (!job) {
@@ -137,7 +142,9 @@ class JobController {
   // Create a new job
   async createJob(req, res) {
     try {
-      const { title, description, serviceId, homeownerId } = req.body;
+      // Ensure req exists to prevent "Cannot read properties of undefined (reading 'body')"
+      const request = req || {};
+      const { title, description, serviceId, homeownerId } = request.body;
 
       // Validate required fields
       if (!title || !description || !serviceId || !homeownerId) {
@@ -165,8 +172,10 @@ class JobController {
   // Update a job
   async updateJob(req, res) {
     try {
-      const { id } = req.params;
-      const { title, description, serviceId } = req.body;
+      // Ensure req exists to prevent "Cannot read properties of undefined (reading 'params')"
+      const request = req || {};
+      const { id } = request.params;
+      const { title, description, serviceId } = request.body;
 
       // Validate required fields
       if (!title || !description || !serviceId) {
@@ -202,7 +211,9 @@ class JobController {
   // Delete a job
   async deleteJob(req, res) {
     try {
-      const { id } = req.params;
+      // Ensure req exists to prevent "Cannot read properties of undefined (reading 'params')"
+      const request = req || {};
+      const { id } = request.params;
       await this.jobModel.deleteJob(id);
 
       res.json({
