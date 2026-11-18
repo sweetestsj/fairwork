@@ -108,6 +108,36 @@ async function initializeDatabase() {
       console.warn('Database not accessible - continuing without initialization. This is expected in test/staging environments.');
       return;
     }
+
+    // Handle specific case of schema mismatch by dropping and recreating the pros table
+    if (error.detail && error.detail.includes('incompatible types')) {
+      console.warn('Schema mismatch detected, attempting to fix...');
+      try {
+        // Drop pros table if it exists
+        await query('DROP TABLE IF EXISTS pros CASCADE');
+        // Recreate with correct schema
+        await query(`
+          CREATE TABLE pros (
+            user_id UUID PRIMARY KEY REFERENCES users(id),
+            business_name VARCHAR(255),
+            license_number VARCHAR(100),
+            certificate_of_insurance TEXT,
+            business_registration TEXT,
+            verified BOOLEAN DEFAULT FALSE,
+            rating NUMERIC(3,2) DEFAULT 0.00,
+            completed_jobs INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+        console.log('Database tables fixed successfully');
+        return;
+      } catch (fixError) {
+        console.error('Failed to fix schema:', fixError);
+        throw error;
+      }
+    }
+
     console.error('Error initializing database:', error);
     throw error;
   }
