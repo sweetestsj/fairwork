@@ -12,9 +12,12 @@ const JobsList = () => {
     minPrice: '',
     maxPrice: '',
     datePosted: '',
-    status: ''
+    status: '',
+    distance: ''
   });
   const [sortOption, setSortOption] = useState('date'); // default sort by date
+  const [userLocation, setUserLocation] = useState(null);
+  const [geolocationError, setGeolocationError] = useState(null);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -34,6 +37,40 @@ const JobsList = () => {
 
     fetchJobs();
   }, []);
+
+  // Get user's geolocation
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+          setGeolocationError(null);
+        },
+        (error) => {
+          console.error('Error getting geolocation:', error);
+          setGeolocationError('Unable to get your location. Distance filtering will be disabled.');
+        }
+      );
+    } else {
+      setGeolocationError('Geolocation is not supported by this browser.');
+    }
+  }, []);
+
+  // Calculate distance between two points (Haversine formula)
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 3958.8; // Earth radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance in miles
+  };
 
   // Apply filters and sorting whenever they change
   useEffect(() => {
@@ -69,6 +106,24 @@ const JobsList = () => {
       filtered = filtered.filter(job => job.status === filters.status);
     }
 
+    // Filter by distance
+    if (filters.distance && userLocation) {
+      filtered = filtered.filter(job => {
+        // Check if job has location data
+        if (!job.latitude || !job.longitude) {
+          return false; // Jobs without location data are excluded from distance filtering
+        }
+
+        const distance = calculateDistance(
+          userLocation.latitude,
+          userLocation.longitude,
+          job.latitude,
+          job.longitude
+        );
+        return distance <= parseFloat(filters.distance);
+      });
+    }
+
     // Apply sorting
     const sortedJobs = [...filtered];
     switch (sortOption) {
@@ -92,7 +147,7 @@ const JobsList = () => {
     }
 
     setFilteredJobs(sortedJobs);
-  }, [filters, jobs, sortOption]);
+  }, [filters, jobs, sortOption, userLocation]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -107,7 +162,8 @@ const JobsList = () => {
       category: '',
       minPrice: '',
       maxPrice: '',
-      datePosted: ''
+      datePosted: '',
+      distance: ''
     });
   };
 
@@ -126,6 +182,13 @@ const JobsList = () => {
   return (
     <div className="jobs-list">
       <h1>Available Jobs</h1>
+
+      {/* Geolocation error message */}
+      {geolocationError && (
+        <div className="geolocation-error">
+          <p>{geolocationError}</p>
+        </div>
+      )}
 
       {/* Sort and Filter Controls */}
       <div className="job-filters">
@@ -199,6 +262,22 @@ const JobsList = () => {
             <option value="open">Open</option>
             <option value="closed">Closed</option>
           </select>
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="distance">Within:</label>
+          <div className="distance-filter-container">
+            <input
+              type="number"
+              id="distance"
+              name="distance"
+              placeholder="Distance in miles"
+              value={filters.distance}
+              onChange={handleFilterChange}
+              min="1"
+            />
+            <span className="miles-label">miles</span>
+          </div>
         </div>
 
         <button onClick={clearFilters} className="clear-filters-btn">Clear Filters</button>
