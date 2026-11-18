@@ -12,7 +12,8 @@ const JobsList = () => {
     minPrice: '',
     maxPrice: '',
     datePosted: '',
-    status: ''
+    status: '',
+    location: ''
   });
   const [sortOption, setSortOption] = useState('date'); // default sort by date
 
@@ -69,6 +70,13 @@ const JobsList = () => {
       filtered = filtered.filter(job => job.status === filters.status);
     }
 
+    // Filter by location
+    if (filters.location) {
+      filtered = filtered.filter(job =>
+        job.location && job.location.toLowerCase().includes(filters.location.toLowerCase())
+      );
+    }
+
     // Apply sorting
     const sortedJobs = [...filtered];
     switch (sortOption) {
@@ -107,7 +115,9 @@ const JobsList = () => {
       category: '',
       minPrice: '',
       maxPrice: '',
-      datePosted: ''
+      datePosted: '',
+      status: '',
+      location: ''
     });
   };
 
@@ -201,6 +211,18 @@ const JobsList = () => {
           </select>
         </div>
 
+        <div className="filter-group">
+          <label htmlFor="location">Location:</label>
+          <input
+            type="text"
+            id="location"
+            name="location"
+            placeholder="Filter by location"
+            value={filters.location}
+            onChange={handleFilterChange}
+          />
+        </div>
+
         <button onClick={clearFilters} className="clear-filters-btn">Clear Filters</button>
       </div>
 
@@ -214,6 +236,7 @@ const JobsList = () => {
               <p className="job-budget">Budget: ${job.budget}</p>
               <p className="job-posted">Posted: {new Date(job.created_at).toLocaleDateString()}</p>
               <p className="job-category">Category: {job.category}</p>
+              {job.location && <p className="job-location">Location: {job.location}</p>}
             </div>
           ))
         ) : (
