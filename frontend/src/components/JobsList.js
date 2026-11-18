@@ -69,11 +69,17 @@ const JobsList = () => {
       case 'date':
         sortedJobs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         break;
+      case 'date_asc':
+        sortedJobs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        break;
       case 'budget':
         sortedJobs.sort((a, b) => b.budget - a.budget);
         break;
       case 'category':
         sortedJobs.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+        break;
+      case 'title':
+        sortedJobs.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
         break;
       default:
         sortedJobs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -121,8 +127,10 @@ const JobsList = () => {
           <label htmlFor="sort">Sort by:</label>
           <select id="sort" value={sortOption} onChange={handleSortChange}>
             <option value="date">Date Posted (Newest First)</option>
+            <option value="date_asc">Date Posted (Oldest First)</option>
             <option value="budget">Budget (Highest First)</option>
             <option value="category">Category</option>
+            <option value="title">Title</option>
           </select>
         </div>
 
