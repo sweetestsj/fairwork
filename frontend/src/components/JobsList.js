@@ -12,7 +12,8 @@ const JobsList = () => {
     minPrice: '',
     maxPrice: '',
     datePosted: '',
-    status: ''
+    status: '',
+    distance: ''
   });
   const [sortOption, setSortOption] = useState('date'); // default sort by date
 
@@ -69,6 +70,15 @@ const JobsList = () => {
       filtered = filtered.filter(job => job.status === filters.status);
     }
 
+    // Filter by distance (if user location is available)
+    if (filters.distance && navigator.geolocation) {
+      filtered = filtered.filter(job => {
+        // This would require job coordinates and user coordinates to calculate distance
+        // For now, we'll implement a placeholder that would work with backend support
+        return true; // Placeholder - actual implementation would be on backend
+      });
+    }
+
     // Apply sorting
     const sortedJobs = [...filtered];
     switch (sortOption) {
@@ -107,7 +117,9 @@ const JobsList = () => {
       category: '',
       minPrice: '',
       maxPrice: '',
-      datePosted: ''
+      datePosted: '',
+      status: '',
+      distance: ''
     });
   };
 
@@ -199,6 +211,19 @@ const JobsList = () => {
             <option value="open">Open</option>
             <option value="closed">Closed</option>
           </select>
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="distance">Distance (km):</label>
+          <input
+            type="number"
+            id="distance"
+            name="distance"
+            placeholder="Max distance"
+            value={filters.distance}
+            onChange={handleFilterChange}
+            min="0"
+          />
         </div>
 
         <button onClick={clearFilters} className="clear-filters-btn">Clear Filters</button>
