@@ -214,6 +214,7 @@ const JobsList = () => {
               <p className="job-budget">Budget: ${job.budget}</p>
               <p className="job-posted">Posted: {new Date(job.created_at).toLocaleDateString()}</p>
               <p className="job-category">Category: {job.category}</p>
+              <a href="https://example.com/apply" target="_blank" rel="noopener noreferrer" className="apply-now-btn">Apply Now</a>
             </div>
           ))
         ) : (
