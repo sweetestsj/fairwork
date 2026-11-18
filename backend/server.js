@@ -5,6 +5,9 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Import database initialization
+const { initializeDatabase } = require('./db/init');
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -35,11 +38,28 @@ app.use('/auth', authRoutes);
 const profileRoutes = require('./routes/profile');
 app.use('/auth', profileRoutes);
 
-// Start server only if not in test environment
+// Initialize database and start server
+async function startServer() {
+  try {
+    // Initialize database tables if they don't exist
+    await initializeDatabase();
+
+    // Start server only if not in test environment
+    if (process.env.NODE_ENV !== 'test') {
+      app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+        // Server startup logging is handled by process manager in production
+      });
+    }
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Only start the server if not in test environment
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    // Server startup logging is handled by process manager in production
-  });
+  startServer();
 }
 
 module.exports = app;
