@@ -51,13 +51,16 @@ const JobsList = () => {
         },
         (error) => {
           console.error('Error getting geolocation:', error);
-          setGeolocationError('Unable to get your location. Distance filtering will be disabled.');
+          // Only show error if we actually need location for filtering
+          if (filters.distance) {
+            setGeolocationError('Unable to get your location. Distance filtering will be disabled.');
+          }
         }
       );
     } else {
       setGeolocationError('Geolocation is not supported by this browser.');
     }
-  }, []);
+  }, [filters.distance]); // Only re-run when distance filter changes
 
   // Calculate distance between two points (Haversine formula)
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -114,12 +117,23 @@ const JobsList = () => {
           return false; // Jobs without location data are excluded from distance filtering
         }
 
+        // Handle potential NaN values in coordinates
+        if (isNaN(job.latitude) || isNaN(job.longitude)) {
+          return false;
+        }
+
         const distance = calculateDistance(
           userLocation.latitude,
           userLocation.longitude,
           job.latitude,
           job.longitude
         );
+
+        // Ensure distance calculation worked properly
+        if (isNaN(distance)) {
+          return false;
+        }
+
         return distance <= parseFloat(filters.distance);
       });
     }
@@ -275,6 +289,7 @@ const JobsList = () => {
               value={filters.distance}
               onChange={handleFilterChange}
               min="1"
+              step="0.1"
             />
             <span className="miles-label">miles</span>
           </div>
