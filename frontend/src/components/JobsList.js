@@ -10,6 +10,12 @@ import './JobsList.css';
 // - Filtering logic
 // - UI components (distance filter input field)
 // - All references to distance functionality have been cleaned up
+//
+// Current implementation details:
+// - No geolocation API calls are made
+// - No distance-related state variables exist
+// - The filters object no longer includes a distance field
+// - All distance-specific filtering logic has been removed
 const JobsList = () => {
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
