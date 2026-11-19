@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const JobController = require('../controllers/jobController');
-const { db } = require('../config/database');
+const db = require('../config/database');
 
 // Initialize job controller with database connection
 const jobController = new JobController(db);
