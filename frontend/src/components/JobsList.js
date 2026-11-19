@@ -3,6 +3,7 @@ import { jobService } from '../services/api';
 import './JobsList.css';
 
 // Distance filter removed as per issue #92 - no longer needed for job listings
+// Implementation completed in commit 3cddba2
 const JobsList = () => {
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
