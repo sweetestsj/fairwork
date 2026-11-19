@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { jobService } from '../services/api';
 import './JobsList.css';
 
-// Distance filter removed as per issue #92
+// Distance filter removed as per issue #92 - no longer needed for job listings
 const JobsList = () => {
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
