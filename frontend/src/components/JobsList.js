@@ -2,20 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { jobService } from '../services/api';
 import './JobsList.css';
 
-// Distance filter removed as per issue #92 - no longer needed for job listings
-// Implementation completed in commit 3cddba2
-// The distance filter functionality has been completely removed from:
-// - State variables (userLocation, geolocationError)
-// - Geolocation API calls and distance calculation logic
-// - Filtering logic
-// - UI components (distance filter input field)
-// - All references to distance functionality have been cleaned up
-//
-// Current implementation details:
-// - No geolocation API calls are made
-// - No distance-related state variables exist
-// - The filters object no longer includes a distance field
-// - All distance-specific filtering logic has been removed
 const JobsList = () => {
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
@@ -50,8 +36,7 @@ const JobsList = () => {
     fetchJobs();
   }, []);
 
-  
-  
+
   // Apply filters and sorting whenever they change
   useEffect(() => {
     let filtered = jobs;
@@ -239,7 +224,7 @@ const JobsList = () => {
           />
         </div>
 
-        
+
         <button onClick={clearFilters} className="clear-filters-btn">Clear Filters</button>
       </div>
 
