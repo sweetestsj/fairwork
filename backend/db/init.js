@@ -1,12 +1,15 @@
-const { query } = require('../config/database');
+const pool = require('../config/database');
 
 /**
  * Initialize database tables if they don't exist
  */
 async function initializeDatabase() {
   try {
+    // Check if we can connect to the database before attempting initialization
+    await pool.connect();
+
     // First, drop existing tables if they exist to avoid foreign key constraint issues
-    await query(`
+    await pool.query(`
       DROP TABLE IF EXISTS reviews;
       DROP TABLE IF EXISTS quotes;
       DROP TABLE IF EXISTS jobs;
@@ -17,7 +20,7 @@ async function initializeDatabase() {
     `);
 
     // Create users table
-    await query(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         email VARCHAR(255) UNIQUE NOT NULL,
@@ -33,7 +36,7 @@ async function initializeDatabase() {
     `);
 
     // Create pros table
-    await query(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS pros (
         user_id UUID PRIMARY KEY REFERENCES users(id),
         business_name VARCHAR(255),
@@ -49,7 +52,7 @@ async function initializeDatabase() {
     `);
 
     // Create homeowners table
-    await query(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS homeowners (
         user_id UUID PRIMARY KEY REFERENCES users(id),
         preferred_services JSONB,
@@ -58,7 +61,7 @@ async function initializeDatabase() {
     `);
 
     // Create services table
-    await query(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS services (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR(255) UNIQUE NOT NULL,
@@ -70,7 +73,7 @@ async function initializeDatabase() {
     `);
 
     // Create jobs table
-    await query(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS jobs (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         homeowner_id UUID REFERENCES homeowners(user_id),
@@ -87,7 +90,7 @@ async function initializeDatabase() {
     `);
 
     // Create quotes table
-    await query(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS quotes (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         job_id UUID REFERENCES jobs(id),
@@ -99,7 +102,7 @@ async function initializeDatabase() {
     `);
 
     // Create reviews table
-    await query(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS reviews (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         job_id UUID REFERENCES jobs(id),
@@ -112,6 +115,9 @@ async function initializeDatabase() {
     `);
 
     console.log('Database tables initialized successfully');
+
+    // Release the connection back to the pool
+    pool.release();
   } catch (error) {
     // If the database connection fails, we still want to continue for staging environments
     // where the initialization might be handled by other processes
