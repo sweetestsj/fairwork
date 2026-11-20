@@ -1,5 +1,5 @@
 // Service model for FairWork
-const { query } = require('../config/database');
+const pool = require('../config/database');
 
 class Service {
   // Get all services with optional category filter
@@ -23,7 +23,7 @@ class Service {
         params = [category];
       }
 
-      const result = await query(sql, params);
+      const result = await pool.query(sql, params);
       return result.rows;
     } catch (error) {
       throw new Error(`Failed to fetch services: ${error.message}`);
@@ -33,7 +33,7 @@ class Service {
   // Get a service by ID
   static async getServiceById(id) {
     try {
-      const result = await query(
+      const result = await pool.query(
         'SELECT id, name, description, category, estimated_duration, created_at FROM services WHERE id = $1',
         [id]
       );
@@ -53,7 +53,7 @@ class Service {
     const { name, description, category, estimated_duration } = serviceData;
 
     try {
-      const result = await query(
+      const result = await pool.query(
         'INSERT INTO services (name, description, category, estimated_duration) VALUES ($1, $2, $3, $4) RETURNING *',
         [name, description, category, estimated_duration]
       );

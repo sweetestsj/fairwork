@@ -1,4 +1,4 @@
-const { query } = require('../config/database');
+const pool = require('../config/database');
 const bcrypt = require('bcryptjs');
 
 class User {
@@ -12,7 +12,7 @@ class User {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
       // Create user - this will throw a constraint violation if email already exists
-      const result = await query(
+      const result = await pool.query(
         'INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role, created_at',
         [name, email, hashedPassword, role]
       );
@@ -32,7 +32,7 @@ class User {
   // Find user by email
   static async findUserByEmail(email) {
     try {
-      const result = await query(
+      const result = await pool.query(
         'SELECT id, name, email, password_hash, role, created_at FROM users WHERE email = $1',
         [email]
       );
@@ -74,7 +74,7 @@ class User {
   // Get user by ID
   static async getUserById(id) {
     try {
-      const result = await query(
+      const result = await pool.query(
         'SELECT id, name, email, role, created_at FROM users WHERE id = $1',
         [id]
       );
