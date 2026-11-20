@@ -42,7 +42,32 @@ export const authService = {
 
 export const userService = {
   getProfile: async () => {
-    const response = await api.get('/auth/profile');
+    const response = await api.get('/api/profile');
+    return response.data;
+  },
+
+  updateProfile: async (profileData) => {
+    const response = await api.put('/api/profile', profileData);
+    return response.data;
+  },
+
+  getServicePreferences: async () => {
+    const response = await api.get('/api/profile/service-preferences');
+    return response.data;
+  },
+
+  updateServicePreferences: async (serviceIds) => {
+    const response = await api.put('/api/profile/service-preferences', { serviceIds });
+    return response.data;
+  },
+
+  getCredentials: async () => {
+    const response = await api.get('/api/profile/credentials');
+    return response.data;
+  },
+
+  updateCredentials: async (credentialsData) => {
+    const response = await api.put('/api/profile/credentials', credentialsData);
     return response.data;
   },
 };
