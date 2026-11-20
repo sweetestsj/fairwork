@@ -36,7 +36,7 @@ app.use('/auth', authRoutes);
 
 // Profile routes
 const profileRoutes = require('./routes/profile');
-app.use('/auth', profileRoutes);
+app.use('/auth/profile', profileRoutes);
 
 // Initialize database and start server
 async function startServer() {
