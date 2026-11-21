@@ -89,6 +89,54 @@ class User {
     }
   }
 
+  // Update user profile
+  static async updateUser(id, userData) {
+    const { name, email } = userData;
+
+    try {
+      let queryText = '';
+      const values = [];
+      let index = 1;
+
+      // Build dynamic update query
+      if (name !== undefined) {
+        queryText += `name = $${index}, `;
+        values.push(name);
+        index++;
+      }
+
+      if (email !== undefined) {
+        queryText += `email = $${index}, `;
+        values.push(email);
+        index++;
+      }
+
+      // Remove trailing comma and space
+      queryText = queryText.slice(0, -2);
+
+      // Add ID to values array for WHERE clause
+      values.push(id);
+
+      // Construct final query
+      const finalQuery = `UPDATE users SET ${queryText} WHERE id = $${index} RETURNING id, name, email, role, created_at`;
+
+      const result = await query(finalQuery, values);
+
+      if (result.rows.length === 0) {
+        throw new Error('User not found');
+      }
+
+      return result.rows[0];
+    } catch (error) {
+      // Check for unique violation error (PostgreSQL specific)
+      if (error.code === '23505') {
+        throw new Error('A user with this email already exists');
+      }
+
+      throw error;
+    }
+  }
+
   // Validate user data
   static validateUserData(userData) {
     const { name, email, password, role } = userData;
