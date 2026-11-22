@@ -143,4 +143,121 @@ describe('Authentication Endpoints', () => {
       expect(response.body).toHaveProperty('message', 'Logout successful');
     });
   });
+
+  describe('PUT /auth/profile', () => {
+    let authToken;
+    let userId;
+
+    // Setup: Register and login a user first
+    beforeAll(async () => {
+      const registerData = {
+        name: 'Test User',
+        email: 'testupdate@example.com',
+        password: 'password123',
+        role: 'homeowner'
+      };
+
+      // Register a user
+      const registerResponse = await request(app)
+        .post('/auth/register')
+        .send(registerData)
+        .expect(201);
+
+      // Login to get token
+      const loginData = {
+        email: registerData.email,
+        password: registerData.password
+      };
+
+      const loginResponse = await request(app)
+        .post('/auth/login')
+        .send(loginData)
+        .expect(200);
+
+      authToken = loginResponse.body.token;
+      userId = registerResponse.body.user.id;
+    });
+
+    // Cleanup after each test
+    afterEach(async () => {
+      try {
+        await query('DELETE FROM users WHERE email = $1', ['testupdate@example.com']);
+      } catch (error) {
+        // Ignore errors during cleanup
+      }
+    });
+
+    it('should update user profile successfully', async () => {
+      const updateData = {
+        name: 'Updated Test User',
+        email: 'updatedtest@example.com'
+      };
+
+      const response = await request(app)
+        .put('/auth/profile')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(updateData)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('message', 'Profile updated successfully');
+      expect(response.body).toHaveProperty('user');
+      expect(response.body.user).toHaveProperty('name', updateData.name);
+      expect(response.body.user).toHaveProperty('email', updateData.email);
+    });
+
+    it('should not update profile without authentication', async () => {
+      const updateData = {
+        name: 'Updated Test User'
+      };
+
+      const response = await request(app)
+        .put('/auth/profile')
+        .send(updateData)
+        .expect(401);
+
+      expect(response.body).toHaveProperty('error', 'Unauthorized');
+    });
+
+    it('should not update profile with invalid data', async () => {
+      const updateData = {
+        email: 'invalid-email'
+      };
+
+      const response = await request(app)
+        .put('/auth/profile')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(updateData)
+        .expect(400);
+
+      expect(response.body).toHaveProperty('error', 'Invalid email format');
+    });
+
+    it('should not update profile with duplicate email', async () => {
+      // First, register another user
+      const secondUser = {
+        name: 'Second User',
+        email: 'seconduser@example.com',
+        password: 'password123',
+        role: 'homeowner'
+      };
+
+      await request(app)
+        .post('/auth/register')
+        .send(secondUser)
+        .expect(201);
+
+      // Try to update with an existing email
+      const updateData = {
+        email: secondUser.email
+      };
+
+      const response = await request(app)
+        .put('/auth/profile')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(updateData)
+        .expect(409);
+
+      expect(response.body).toHaveProperty('error', 'Email already in use');
+    });
+  });
 });

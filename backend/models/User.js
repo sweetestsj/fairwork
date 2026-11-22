@@ -115,6 +115,50 @@ class User {
       throw new Error('Role must be either "homeowner" or "pro"');
     }
   }
+
+  // Update user profile
+  static async updateUser(userId, updateData) {
+    try {
+      const { name, email } = updateData;
+      const fields = [];
+      const values = [];
+
+      if (name !== undefined) {
+        fields.push('name = $' + (fields.length + 1));
+        values.push(name);
+      }
+
+      if (email !== undefined) {
+        fields.push('email = $' + (fields.length + 1));
+        values.push(email);
+      }
+
+      if (fields.length === 0) {
+        throw new Error('No valid fields to update');
+      }
+
+      // Add user ID to the end of values array for WHERE clause
+      values.push(userId);
+
+      const queryText = `UPDATE users SET ${fields.join(', ')} WHERE id = $${fields.length + 1} RETURNING id, name, email, role, created_at`;
+
+      const result = await query(queryText, values);
+
+      if (result.rows.length === 0) {
+        throw new Error('User not found');
+      }
+
+      return result;
+    } catch (error) {
+      // Check for unique violation error (PostgreSQL specific)
+      if (error.code === '23505') {
+        throw new Error('A user with this email already exists');
+      }
+
+      // If it's a different kind of database error, re-throw the original error
+      throw error;
+    }
+  }
 }
 
 module.exports = User;
