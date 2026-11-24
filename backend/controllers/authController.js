@@ -203,6 +203,83 @@ const getProfile = async (req, res) => {
   }
 };
 
+// Update user profile endpoint (protected route)
+const updateProfile = async (req, res) => {
+  try {
+    // The user is already authenticated via middleware
+    const userId = req.user.id;
+
+    // Extract fields that can be updated
+    const { name, email } = req.body;
+
+    // Validate that at least one field is provided for update
+    if (!name && !email) {
+      return res.status(400).json({
+        error: 'At least one of name or email must be provided for update'
+      });
+    }
+
+    // If email is being updated, validate it
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          error: 'Invalid email format'
+        });
+      }
+    }
+
+    // Update user in database
+    const result = await User.updateUser(userId, { name, email });
+
+    // Generate new token with updated information
+    const token = generateToken(result);
+
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user: {
+        id: result.id,
+        name: result.name,
+        email: result.email,
+        role: result.role
+      },
+      token
+    });
+  } catch (error) {
+    console.error('Profile update error:', error);
+
+    // Handle database connection errors
+    if (error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
+      return res.status(503).json({
+        error: 'Service unavailable',
+        message: 'Database connection failed'
+      });
+    }
+
+    // Handle unique constraint violation (email already exists)
+    if (error.code === '23505') {
+      return res.status(409).json({
+        error: 'Email already in use',
+        message: 'A user with this email already exists'
+      });
+    }
+
+    // Handle other database errors
+    if (error.message.includes('database') || error.message.includes('DB')) {
+      return res.status(500).json({
+        error: 'Database error occurred during profile update',
+        message: error.message
+      });
+    }
+
+    // Default to 400 for validation errors or other issues
+    res.status(400).json({
+      error: 'Failed to update profile',
+      message: error.message
+    });
+  }
+};
+
 // Logout endpoint (client-side token removal)
 const logout = async (req, res) => {
   // For JWT tokens, logout is handled client-side by removing the token
@@ -216,5 +293,6 @@ module.exports = {
   register,
   login,
   getProfile,
+  updateProfile,
   logout
 };
