@@ -5,16 +5,21 @@ const { query } = require('../config/database');
  */
 async function initializeDatabase() {
   try {
-    // First, drop existing tables if they exist to avoid foreign key constraint issues
-    await query(`
-      DROP TABLE IF EXISTS reviews;
-      DROP TABLE IF EXISTS quotes;
-      DROP TABLE IF EXISTS jobs;
-      DROP TABLE IF EXISTS services;
-      DROP TABLE IF EXISTS homeowners;
-      DROP TABLE IF EXISTS pros;
-      DROP TABLE IF EXISTS users;
-    `);
+    // Drop existing tables if they exist to avoid foreign key constraint issues
+    // We'll handle each table drop separately for better error handling
+    const dropTables = [
+      'DROP TABLE IF EXISTS reviews;',
+      'DROP TABLE IF EXISTS quotes;',
+      'DROP TABLE IF EXISTS jobs;',
+      'DROP TABLE IF EXISTS services;',
+      'DROP TABLE IF EXISTS homeowners;',
+      'DROP TABLE IF EXISTS pros;',
+      'DROP TABLE IF EXISTS users;'
+    ];
+
+    for (const dropQuery of dropTables) {
+      await query(dropQuery);
+    }
 
     // Create users table
     await query(`
