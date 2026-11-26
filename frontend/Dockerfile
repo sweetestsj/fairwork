@@ -1,32 +1,26 @@
-FROM node:18-alpine as builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app/frontend
 
-# Copy package files
+# Copy package files and install dependencies
 COPY package*.json ./
+RUN npm ci
 
-# Install all dependencies
-RUN npm install
-
-# Copy source code
+# Copy source code and build Vite production bundle
 COPY . .
-
-# Build the app
 RUN npm run build
 
 # Production stage
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app/frontend
 
-# Copy built files from builder stage
-COPY --from=builder /app/frontend/build ./build
+# Copy built Vite dist assets from builder stage
+COPY --from=builder /app/frontend/dist ./dist
 
-# Install serve for serving static files
+# Install serve for serving static SPA files
 RUN npm install -g serve
 
-# Expose port
 EXPOSE 3001
 
-# Serve the built app
-CMD ["serve", "-s", "build", "-l", "3001"]
+CMD ["serve", "-s", "dist", "-l", "3001"]

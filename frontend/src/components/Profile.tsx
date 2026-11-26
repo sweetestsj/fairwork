@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { userService } from '../services/api';
+import type { User } from '../types/api';
 import './Profile.css';
 
 const Profile = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -17,13 +19,11 @@ const Profile = () => {
           return;
         }
 
-        // Fetch user profile from backend API
         const userData = await userService.getProfile();
         setUser(userData.user);
       } catch (err) {
         console.error('Error fetching profile:', err);
-        if (err.response?.status === 401) {
-          // Token is invalid, redirect to login
+        if (axios.isAxiosError(err) && err.response?.status === 401) {
           localStorage.removeItem('token');
           window.location.href = '/login';
         } else {

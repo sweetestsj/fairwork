@@ -1,26 +1,43 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import { ChangeEvent, FormEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/api';
+import type { ApiErrorResponse, User, UserRole } from '../types/api';
 import './RegisterForm.css';
 
-const RegisterForm = ({ onRegister }) => {
-  const [formData, setFormData] = useState({
+interface RegisterFormProps {
+  onRegister: (user: User) => void;
+}
+
+interface RegisterFormState {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  role: UserRole;
+}
+
+const RegisterForm = ({ onRegister }: RegisterFormProps) => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState<RegisterFormState>({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
+    role: 'homeowner',
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -36,14 +53,19 @@ const RegisterForm = ({ onRegister }) => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        role: formData.role,
       });
       localStorage.setItem('token', response.token);
       onRegister(response.user);
+      navigate('/profile');
     } catch (err) {
-      // Handle different types of errors from backend
-      if (err.response && err.response.data) {
-        setError(err.response.data.message || 'Registration failed. Please try again.');
-      } else if (err.message) {
+      if (axios.isAxiosError<ApiErrorResponse>(err) && err.response?.data) {
+        setError(
+          err.response.data.message ||
+            err.response.data.error ||
+            'Registration failed. Please try again.'
+        );
+      } else if (err instanceof Error && err.message) {
         setError(err.message);
       } else {
         setError('An unknown error occurred during registration');
@@ -80,6 +102,13 @@ const RegisterForm = ({ onRegister }) => {
             onChange={handleChange}
             required
           />
+        </div>
+        <div className="form-group">
+          <label htmlFor="role">Account Type</label>
+          <select id="role" name="role" value={formData.role} onChange={handleChange}>
+            <option value="homeowner">Homeowner</option>
+            <option value="pro">Service Pro</option>
+          </select>
         </div>
         <div className="form-group">
           <label htmlFor="password">Password</label>

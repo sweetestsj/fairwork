@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { serviceService } from '../services/api';
+import type { Service } from '../types/api';
 import './ServicesList.css';
 
 const ServicesList = () => {
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const response = await serviceService.getServices();
-        // Extract the data array from API response structure
-        const data = Array.isArray(response) ? response : (response?.data || []);
+        const data = Array.isArray(response) ? response : response?.data || [];
         setServices(data);
       } catch (err) {
         setError('Failed to fetch services');
@@ -39,10 +39,14 @@ const ServicesList = () => {
       <div className="services-grid">
         {services.map((service) => (
           <div key={service.id} className="service-card">
-            <h2>{service.title}</h2>
+            <h2>{service.name}</h2>
             <p className="service-description">{service.description}</p>
-            <p className="service-price">Price: ${service.price}</p>
-            <p className="service-provider">Provider: {service.providerName}</p>
+            <p className="service-category">Category: {service.category}</p>
+            {service.estimated_duration !== undefined && (
+              <p className="service-duration">
+                Est. Duration: {service.estimated_duration} mins
+              </p>
+            )}
           </div>
         ))}
       </div>

@@ -1,8 +1,13 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import './Navigation.css';
 
-const Navigation = ({ isLoggedIn, onLogout }) => {
+interface NavigationProps {
+  isLoggedIn: boolean;
+  userName?: string;
+  onLogout: () => void;
+}
+
+const Navigation = ({ isLoggedIn, userName, onLogout }: NavigationProps) => {
   return (
     <nav className="navigation">
       <div className="nav-container">
@@ -29,11 +34,11 @@ const Navigation = ({ isLoggedIn, onLogout }) => {
             <>
               <li className="nav-item">
                 <Link to="/profile" className="nav-link">
-                  Profile
+                  {userName ? `Profile (${userName})` : 'Profile'}
                 </Link>
               </li>
               <li className="nav-item">
-                <button className="nav-button" onClick={onLogout}>
+                <button className="nav-button" type="button" onClick={onLogout}>
                   Logout
                 </button>
               </li>
