@@ -9,7 +9,17 @@ class Job {
   async getAllJobs(filters = {}, sortOrder = 'j.created_at DESC') {
     let query = `
       SELECT j.id, j.title, j.description, s.category, j.created_at,
-             j.updated_at, j.status, u.name as provider_name, j.budget
+             j.updated_at, j.status,
+             CASE
+               WHEN u.first_name IS NOT NULL AND u.last_name IS NOT NULL
+               THEN CONCAT(u.first_name, ' ', u.last_name)
+               WHEN u.first_name IS NOT NULL
+               THEN u.first_name
+               WHEN u.last_name IS NOT NULL
+               THEN u.last_name
+               ELSE 'Unknown User'
+             END as provider_name,
+             j.budget
       FROM jobs j
       JOIN users u ON j.homeowner_id = u.id
       JOIN services s ON j.service_id = s.id
@@ -96,7 +106,16 @@ class Job {
   async getJobById(id) {
     const query = `
       SELECT j.id, j.title, j.description, s.category, j.created_at,
-             j.updated_at, j.status, u.name as provider_name
+             j.updated_at, j.status,
+             CASE
+               WHEN u.first_name IS NOT NULL AND u.last_name IS NOT NULL
+               THEN CONCAT(u.first_name, ' ', u.last_name)
+               WHEN u.first_name IS NOT NULL
+               THEN u.first_name
+               WHEN u.last_name IS NOT NULL
+               THEN u.last_name
+               ELSE 'Unknown User'
+             END as provider_name
       FROM jobs j
       JOIN users u ON j.homeowner_id = u.id
       JOIN services s ON j.service_id = s.id
