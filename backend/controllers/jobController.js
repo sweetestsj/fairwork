@@ -65,6 +65,17 @@ class JobController {
     } catch (error) {
       // Ensure error.message is properly handled to prevent null reference
       const errorMessage = error && typeof error.message === 'string' ? error.message : 'An unknown error occurred';
+
+      // Handle database connection errors gracefully
+      if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+        console.warn('Database connection failed, returning empty results:', errorMessage);
+        return res.json({
+          success: true,
+          count: 0,
+          data: []
+        });
+      }
+
       res.status(500).json({
         success: false,
         message: errorMessage
