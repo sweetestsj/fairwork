@@ -6,10 +6,11 @@ class Job {
   }
 
   // Get all jobs with optional filtering and sorting
-  async getAllJobs(filters = {}, sortOrder = 'j.created_at DESC') {
+  async getAllJobs(filters = {}, sortOrder = 'j.created_at DESC', distanceFilter = {}) {
     let query = `
       SELECT j.id, j.title, j.description, s.category, j.created_at,
-             j.updated_at, j.status, u.name as provider_name, j.budget
+             j.updated_at, j.status, u.name as provider_name, j.budget,
+             j.location
       FROM jobs j
       JOIN users u ON j.homeowner_id = u.id
       JOIN services s ON j.service_id = s.id
@@ -82,7 +83,53 @@ class Job {
       paramIndex++;
     }
 
-    query += ` ORDER BY ${sortOrder}`;
+    // Add distance filter if provided
+    if (distanceFilter.distance && distanceFilter.lat && distanceFilter.lng) {
+      // Validate that location data exists in jobs table before filtering
+      if (!hasWhereClause) {
+        query += ` WHERE j.location IS NOT NULL`;
+        hasWhereClause = true;
+      } else {
+        query += ` AND j.location IS NOT NULL`;
+      }
+
+      // Add distance calculation and filtering using PostGIS or Haversine formula
+      // For simplicity, we'll use the Haversine formula to calculate distance in miles
+      const haversineQuery = `
+        SELECT *,
+               (3959 * acos(
+                 cos(radians($${paramIndex})) *
+                 cos(radians(j.location->>'lat'::numeric)) *
+                 cos(radians(j.location->>'lng'::numeric) - radians($${paramIndex + 1})) +
+                 sin(radians($${paramIndex})) *
+                 sin(radians(j.location->>'lat'::numeric))
+               )) AS distance
+        FROM jobs j
+        JOIN users u ON j.homeowner_id = u.id
+        JOIN services s ON j.service_id = s.id
+        WHERE j.status = 'open'
+        AND j.location IS NOT NULL
+        AND (3959 * acos(
+          cos(radians($${paramIndex})) *
+          cos(radians(j.location->>'lat'::numeric)) *
+          cos(radians(j.location->>'lng'::numeric) - radians($${paramIndex + 1})) +
+          sin(radians($${paramIndex})) *
+          sin(radians(j.location->>'lat'::numeric))
+        )) <= $${paramIndex + 2}
+      `;
+
+      // Replace the entire query with distance-based one
+      query = haversineQuery;
+
+      // Add parameters for distance calculation
+      params.push(distanceFilter.lat, distanceFilter.lng, distanceFilter.distance);
+      paramIndex += 3;
+    }
+
+    // If no distance filter was applied, continue with standard ordering
+    if (!distanceFilter.distance || !distanceFilter.lat || !distanceFilter.lng) {
+      query += ` ORDER BY ${sortOrder}`;
+    }
 
     try {
       const result = await this.db.query(query, params);
