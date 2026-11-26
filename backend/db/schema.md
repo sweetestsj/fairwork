@@ -7,6 +7,7 @@ The FairWork platform uses PostgreSQL for data persistence. This document outlin
 
 ### users
 - id (UUID, primary key)
+- name (string)
 - email (string, unique)
 - password_hash (string)
 - role (enum: 'homeowner', 'pro')
@@ -26,6 +27,8 @@ The FairWork platform uses PostgreSQL for data persistence. This document outlin
 - verified (boolean)
 - rating (numeric)
 - completed_jobs (integer)
+- created_at (timestamp)
+- updated_at (timestamp)
 
 ### homeowners
 - user_id (UUID, foreign key to users.id, primary key)
@@ -40,12 +43,15 @@ The FairWork platform uses PostgreSQL for data persistence. This document outlin
 - estimated_duration (integer - minutes)
 - created_at (timestamp)
 
+Seeded idempotently on startup with the 7 launch services from `PRODUCT.md`: Pressure Washing, Window Cleaning, Junk Removal, Drywall Patch & Repair, Knob & Lock Install/Replace, Tree & Bush Trimming, and Gutter Cleaning.
+
 ### jobs
 - id (UUID, primary key)
-- homeowner_id (UUID, foreign key to homeowners.user_id)
+- homeowner_id (UUID, foreign key to users.id)
 - service_id (UUID, foreign key to services.id)
 - title (string)
 - description (text)
+- budget (numeric)
 - budget_min (numeric)
 - budget_max (numeric)
 - location (jsonb)

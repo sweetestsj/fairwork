@@ -8,6 +8,12 @@ services:
       POSTGRES_DB: fairwork
       POSTGRES_USER: fairwork_user
       POSTGRES_PASSWORD: fairwork_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fairwork_user -d fairwork"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -20,7 +26,8 @@ services:
       NODE_ENV: development
       DATABASE_URL: postgresql://fairwork_user:fairwork_password@db:5432/fairwork
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "3000:3000"
 

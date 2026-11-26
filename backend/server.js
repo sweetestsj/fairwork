@@ -22,21 +22,24 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Service routes
+// Service routes (canonical + legacy alias)
 const serviceRoutes = require('./routes/services');
+app.use('/api/services', serviceRoutes);
 app.use('/services', serviceRoutes);
 
-// Jobs routes
+// Jobs routes (canonical)
 const jobsRouter = require('./routes/jobs');
 app.use('/api/jobs', jobsRouter);
 
-// Authentication routes
-const authRoutes = require('./routes/auth');
-app.use('/auth', authRoutes);
-
-// Profile routes
+// Profile routes (canonical + legacy alias)
 const profileRoutes = require('./routes/profile');
+app.use('/api/auth/profile', profileRoutes);
 app.use('/auth/profile', profileRoutes);
+
+// Authentication routes (canonical + legacy alias)
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 
 // Initialize database and start server
 async function startServer() {

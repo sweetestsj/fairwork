@@ -5,7 +5,7 @@ require('dotenv').config();
 // Generate JWT token
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
+    { id: user.id, name: user.name, email: user.email, role: user.role },
     process.env.JWT_SECRET || 'fairwork_secret_key',
     { expiresIn: '24h' }
   );
@@ -46,8 +46,8 @@ const validateRequestBody = (req, res, requiredFields) => {
 // Registration endpoint
 const register = async (req, res) => {
   try {
-    // Validate request body
-    const validationError = validateRequestBody(req, res, ['name', 'email', 'password', 'role']);
+    // Ensure request body exists before field-level validation
+    const validationError = validateRequestBody(req, res, []);
     if (validationError) return validationError;
 
     const { name, email, password, role } = req.body;
@@ -184,8 +184,15 @@ const login = async (req, res) => {
 // Get user profile endpoint (protected route)
 const getProfile = async (req, res) => {
   try {
-    // The user is already authenticated via middleware
-    const user = req.user;
+    // Load fresh user profile from database using authenticated user ID
+    const user = await User.getUserById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found',
+        message: 'Authenticated user profile could not be found'
+      });
+    }
 
     // Remove password hash from the user object if it exists
     const { password_hash, ...userWithoutHash } = user;
@@ -196,6 +203,15 @@ const getProfile = async (req, res) => {
     });
   } catch (error) {
     console.error('Profile retrieval error:', error);
+
+    // Handle database connection errors
+    if (error.code === 'ENOTFOUND' || error.syscall === 'getaddrinfo') {
+      return res.status(503).json({
+        error: 'Service unavailable',
+        message: 'Database connection failed'
+      });
+    }
+
     res.status(500).json({
       error: 'Failed to retrieve profile',
       message: error.message
@@ -257,7 +273,7 @@ const updateProfile = async (req, res) => {
     }
 
     // Handle unique constraint violation (email already exists)
-    if (error.code === '23505') {
+    if (error.code === '23505' || (error.message && error.message.includes('already exists'))) {
       return res.status(409).json({
         error: 'Email already in use',
         message: 'A user with this email already exists'
