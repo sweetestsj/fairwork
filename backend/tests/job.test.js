@@ -1,6 +1,17 @@
-// Simple test for job functionality - focusing on basic structure and not full server testing
+// Simple test for job functionality - focusing on basic structure and route precedence
+jest.mock('../config/database', () => ({
+  query: jest.fn()
+}));
+
+const request = require('supertest');
+const express = require('express');
+const db = require('../config/database');
 
 describe('Jobs API', () => {
+  beforeEach(() => {
+    db.query.mockReset();
+  });
+
   // This test just verifies that the files exist and have correct structure
   it('should have all required job-related files', () => {
     const fs = require('fs');
@@ -39,5 +50,44 @@ describe('Jobs API', () => {
     expect(jobsRouter.post).toBeDefined();
     expect(jobsRouter.put).toBeDefined();
     expect(jobsRouter.delete).toBeDefined();
+  });
+
+  it('should route GET /api/jobs/category/:category without shadowing GET /api/jobs/:id', async () => {
+    const app = express();
+    app.use(express.json());
+    app.use('/api/jobs', require('../routes/jobs'));
+
+    // Category lookup hits getJobsByCategory (ILIKE category query)
+    db.query.mockResolvedValueOnce({
+      rows: [{ id: 'job-1', title: 'Driveway wash', category: 'Exterior Cleaning' }]
+    });
+
+    const catRes = await request(app)
+      .get('/api/jobs/category/Exterior')
+      .expect(200);
+
+    expect(catRes.body).toEqual({
+      success: true,
+      count: 1,
+      data: [{ id: 'job-1', title: 'Driveway wash', category: 'Exterior Cleaning' }]
+    });
+    expect(db.query.mock.calls[0][0]).toMatch(/s\.category ILIKE \$1/i);
+
+    // ID lookup hits getJobById (WHERE j.id = $1)
+    const jobId = '12345678-1234-1234-1234-123456789012';
+    db.query.mockResolvedValueOnce({
+      rows: [{ id: jobId, title: 'Driveway wash', status: 'open' }]
+    });
+
+    const idRes = await request(app)
+      .get(`/api/jobs/${jobId}`)
+      .expect(200);
+
+    expect(idRes.body).toEqual({
+      success: true,
+      data: { id: jobId, title: 'Driveway wash', status: 'open' }
+    });
+    expect(db.query.mock.calls[1][0]).toMatch(/WHERE j\.id = \$1/i);
+    expect(db.query.mock.calls[1][1]).toEqual([jobId]);
   });
 });

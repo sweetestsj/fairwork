@@ -1,30 +1,60 @@
 const { query } = require('../config/database');
 
+const LAUNCH_SERVICES = [
+  {
+    name: 'Pressure Washing',
+    description: 'High-pressure exterior cleaning for driveways, sidewalks, patios, decks, and siding.',
+    category: 'Exterior Cleaning',
+    estimated_duration: 120,
+  },
+  {
+    name: 'Window Cleaning',
+    description: 'Interior and exterior window washing, including screens and sills.',
+    category: 'Exterior Cleaning',
+    estimated_duration: 90,
+  },
+  {
+    name: 'Junk Removal',
+    description: 'Hauling and responsible disposal of unwanted furniture, appliances, yard waste, and household clutter.',
+    category: 'Hauling & Cleanup',
+    estimated_duration: 90,
+  },
+  {
+    name: 'Drywall Patch & Repair',
+    description: 'Patching, taping, mudding, and texture matching for drywall holes, cracks, and wall damage.',
+    category: 'Interior Repair',
+    estimated_duration: 120,
+  },
+  {
+    name: 'Knob & Lock Install/Replace',
+    description: 'Installation or replacement of door knobs, deadbolts, smart locks, and residential door hardware.',
+    category: 'Handyman & Hardware',
+    estimated_duration: 60,
+  },
+  {
+    name: 'Tree & Bush Trimming',
+    description: 'Pruning, shaping, and trimming of residential trees, shrubs, hedges, and bushes.',
+    category: 'Lawn & Yard',
+    estimated_duration: 120,
+  },
+  {
+    name: 'Gutter Cleaning',
+    description: 'Clearing leaves and debris from roof gutters and downspouts to ensure proper drainage.',
+    category: 'Exterior Cleaning',
+    estimated_duration: 90,
+  },
+];
+
 /**
- * Initialize database tables if they don't exist
+ * Initialize database tables and seed launch services idempotently.
  */
 async function initializeDatabase() {
   try {
-    // Drop existing tables if they exist to avoid foreign key constraint issues
-    // We'll handle each table drop separately for better error handling
-    const dropTables = [
-      'DROP TABLE IF EXISTS reviews;',
-      'DROP TABLE IF EXISTS quotes;',
-      'DROP TABLE IF EXISTS jobs;',
-      'DROP TABLE IF EXISTS services;',
-      'DROP TABLE IF EXISTS homeowners;',
-      'DROP TABLE IF EXISTS pros;',
-      'DROP TABLE IF EXISTS users;'
-    ];
-
-    for (const dropQuery of dropTables) {
-      await query(dropQuery);
-    }
-
     // Create users table
     await query(`
       CREATE TABLE IF NOT EXISTS users (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255),
         email VARCHAR(255) UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
         role VARCHAR(20) NOT NULL,
@@ -35,6 +65,11 @@ async function initializeDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+
+    // Ensure users.name exists on pre-existing databases
+    await query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS name VARCHAR(255);
     `);
 
     // Create pros table
@@ -78,10 +113,11 @@ async function initializeDatabase() {
     await query(`
       CREATE TABLE IF NOT EXISTS jobs (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        homeowner_id UUID REFERENCES homeowners(user_id),
+        homeowner_id UUID REFERENCES users(id),
         service_id UUID REFERENCES services(id),
         title VARCHAR(255) NOT NULL,
         description TEXT,
+        budget NUMERIC(10,2),
         budget_min NUMERIC(10,2),
         budget_max NUMERIC(10,2),
         location JSONB,
@@ -89,6 +125,29 @@ async function initializeDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+
+    // Ensure jobs.budget exists and homeowner_id references users(id) on pre-existing databases
+    await query(`
+      ALTER TABLE jobs ADD COLUMN IF NOT EXISTS budget NUMERIC(10,2);
+    `);
+
+    await query(`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1
+          FROM pg_constraint c
+          JOIN pg_class t ON c.conrelid = t.oid
+          JOIN pg_class r ON c.confrelid = r.oid
+          WHERE t.relname = 'jobs'
+            AND c.conname = 'jobs_homeowner_id_fkey'
+            AND r.relname = 'homeowners'
+        ) THEN
+          ALTER TABLE jobs DROP CONSTRAINT jobs_homeowner_id_fkey;
+          ALTER TABLE jobs ADD CONSTRAINT jobs_homeowner_id_fkey FOREIGN KEY (homeowner_id) REFERENCES users(id);
+        END IF;
+      END $$;
     `);
 
     // Create quotes table
@@ -116,6 +175,18 @@ async function initializeDatabase() {
       );
     `);
 
+    // Idempotently seed the 7 launch services from PRODUCT.md
+    for (const service of LAUNCH_SERVICES) {
+      await query(
+        `
+          INSERT INTO services (name, description, category, estimated_duration)
+          VALUES ($1, $2, $3, $4)
+          ON CONFLICT (name) DO NOTHING;
+        `,
+        [service.name, service.description, service.category, service.estimated_duration]
+      );
+    }
+
     console.log('Database tables initialized successfully');
   } catch (error) {
     // If the database connection fails, we still want to continue for staging environments
@@ -129,4 +200,4 @@ async function initializeDatabase() {
   }
 }
 
-module.exports = { initializeDatabase };
+module.exports = { initializeDatabase, LAUNCH_SERVICES };
