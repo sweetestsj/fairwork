@@ -61,3 +61,8 @@
   justify-content: center;
   gap: 1rem;
 }
+
+.cta-buttons .btn {
+  text-decoration: none;
+  display: inline-block;
+}

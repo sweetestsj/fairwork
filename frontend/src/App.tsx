@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Home from './components/Home';
 import ServicesList from './components/ServicesList';
@@ -7,22 +7,21 @@ import JobsList from './components/JobsList';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import Profile from './components/Profile';
+import type { User } from './types/api';
 import './App.css';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       setIsLoggedIn(true);
-      // In a real app, you would decode the token to get user info
-      // setUser(decodedToken.user);
     }
   }, []);
 
-  const handleLogin = (userData) => {
+  const handleLogin = (userData: User) => {
     setIsLoggedIn(true);
     setUser(userData);
   };
@@ -34,9 +33,9 @@ function App() {
   };
 
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="App">
-        <Navigation isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+        <Navigation isLoggedIn={isLoggedIn} userName={user?.name} onLogout={handleLogout} />
         <main>
           <Routes>
             <Route path="/" element={<Home />} />

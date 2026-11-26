@@ -1,4 +1,4 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 import './Home.css';
 
 const Home = () => {
@@ -28,8 +28,12 @@ const Home = () => {
         <h2>Get Started Today</h2>
         <p>Join our marketplace to access all features and benefits.</p>
         <div className="cta-buttons">
-          <button className="btn btn-primary">Sign Up</button>
-          <button className="btn btn-secondary">Learn More</button>
+          <Link to="/register" className="btn btn-primary">
+            Sign Up
+          </Link>
+          <Link to="/services" className="btn btn-secondary">
+            Learn More
+          </Link>
         </div>
       </section>
     </div>
