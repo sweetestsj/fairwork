@@ -23,12 +23,23 @@ class JobController {
       if (datePosted) filters.datePosted = datePosted;
       if (status) filters.status = status;
 
-      // Handle distance filtering parameters
+      // Handle distance filtering parameters with validation
       const distanceFilter = {};
       if (distance && lat && lng) {
-        distanceFilter.distance = parseFloat(distance);
-        distanceFilter.lat = parseFloat(lat);
-        distanceFilter.lng = parseFloat(lng);
+        // Validate that distance values are positive numbers
+        const distanceValue = parseFloat(distance);
+        const latValue = parseFloat(lat);
+        const lngValue = parseFloat(lng);
+
+        if (!isNaN(distanceValue) && !isNaN(latValue) && !isNaN(lngValue) &&
+            distanceValue > 0 && distanceValue <= 1000 &&
+            latValue >= -90 && latValue <= 90 &&
+            lngValue >= -180 && lngValue <= 180) {
+          distanceFilter.distance = distanceValue;
+          distanceFilter.lat = latValue;
+          distanceFilter.lng = lngValue;
+        }
+        // If any validation fails, distanceFilter remains empty and no distance filtering is applied
       }
 
       // Determine sort order with enhanced sorting options

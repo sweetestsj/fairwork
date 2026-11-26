@@ -72,10 +72,25 @@ describe('Job Distance Filtering', () => {
   });
 
   test('should handle invalid distance parameters gracefully', async () => {
-    const response = await request(app)
+    // Test with invalid distance values
+    const response1 = await request(app)
       .get('/api/jobs?distance=invalid&lat=40.7128&lng=-74.0060')
       .expect(200);
 
-    expect(response.body).toHaveProperty('success', true);
+    expect(response1.body).toHaveProperty('success', true);
+
+    // Test with negative distance
+    const response2 = await request(app)
+      .get('/api/jobs?distance=-5&lat=40.7128&lng=-74.0060')
+      .expect(200);
+
+    expect(response2.body).toHaveProperty('success', true);
+
+    // Test with out of bounds distance
+    const response3 = await request(app)
+      .get('/api/jobs?distance=2000&lat=40.7128&lng=-74.0060')
+      .expect(200);
+
+    expect(response3.body).toHaveProperty('success', true);
   });
 });
